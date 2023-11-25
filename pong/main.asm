@@ -36,6 +36,8 @@ Loop:
 loop_continue:
 	; Print ball and loop
 	CALL 	PrintBall
+	CALL	ReprintLine
+	
 	JR	Loop
 
 countLoopBall:	DB	$00

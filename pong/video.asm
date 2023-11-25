@@ -150,6 +150,55 @@
 	RET
 
 ;------------------------------------------------------------------------------
+; ReprintLine
+; Repaint the centre line when the ball passes over it. This is not optimal and
+; will be improved later.
+;
+; Input: None
+; Output: None
+; AF, BC and HL changed on exit
+;------------------------------------------------------------------------------
+
+;
+;	TODO : Understand this better !!
+;
+@ReprintLine:
+	; Load ball position
+	LD	HL, (ballPos)
+	; Load just the line and column
+	LD	A, L
+	; Mask to keep just the line
+	AND	$E0
+	; Set the column to 16
+	OR	$10
+	; Store it back to L
+	LD	L, A
+
+	; Number of scanlines to be printed
+	LD	B, $06
+reprintLine_loop:
+	LD	A, H
+	AND	$07
+	CP	$01
+	JR	C, reprintLine_00
+	CP	$07
+	JR	Z, reprintLine_00
+	LD	C, LINE
+	JR	reprintLine_loopCont
+
+reprintLine_00:
+	LD	C, ZERO
+
+reprintLine_loopCont:
+	LD	A, (HL)
+	OR	C
+	LD	(HL), A
+	CALL	NextScan
+	DJNZ	reprintLine_loop
+
+	RET
+
+;------------------------------------------------------------------------------
 ; Attribute addressing:
 ;	Attribute Bits:				Colours:
 ;	7 - Blink (0 steady, 1 blink)		7 - White
