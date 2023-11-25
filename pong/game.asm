@@ -17,12 +17,12 @@
 	LD	A, (23672)	; current timer setting.
         SUB	(HL)		; difference between the two.
 	CP	1		; have two frames elapsed yet?
-	JR	NC, wait0	; yes, no more delay.
+	JR	NC, .wait0	; yes, no more delay.
         JR	Wait
-!wait0:	LD	A, (23672)	; current timer.
+.wait0:	LD	A, (23672)	; current timer.
 	LD	(HL),  A	; store this setting.
 	RET
-!pTime:	DB	$00
+pTime:	DB	$00
 
 ;------------------------------------------------------------------------------
 ; MovePaddles
@@ -46,55 +46,55 @@
 	LD	(countLoopPaddles), A
 	; If we've not reached our delay limit carry on waiting
 	CP	$04
-	JR	NZ, movePaddle_end
+	JR	NZ, .end
 
 	; Finished waiting? Reset delay and proceed to move ball
 	LD	A, $00
 	LD	(countLoopPaddles), A
 
-!movePaddle1_up:
+.p1_up:
 	BIT	$00, D
-	JR	Z, movePaddle1_down
+	JR	Z, .p1_down
 	LD	HL, (paddle1pos)
 	LD	A, PADDLE_TOP
 	CALL	CheckTop
-	JR	Z, movePaddle2_up
+	JR	Z, .p2_up
 	CALL	PreviousScan
 	LD	(paddle1pos), HL
-	JR	movePaddle2_up
+	JR	.p2_up
 
-!movePaddle1_down:
+.p1_down:
 	BIT	$01, D
-	JR	Z, movePaddle2_up
+	JR	Z, .p2_up
 	LD	HL, (paddle1pos)
 	LD	A, PADDLE_BOTTOM
 	CALL	CheckBottom
-	JR	Z, movePaddle2_up
+	JR	Z, .p2_up
 	CALL	NextScan
 	LD	(paddle1pos), HL
 
-!movePaddle2_up:
+.p2_up:
 	BIT	$02, D
-	JR	Z, movePaddle2_down
+	JR	Z, .p2_down
 	LD	HL, (paddle2pos)
 	LD	A, PADDLE_TOP
 	CALL	CheckTop
-	JR	Z, movePaddle_end
+	JR	Z, .end
 	CALL	PreviousScan
 	LD	(paddle2pos), HL
-	JR	movePaddle_end
+	JR	.end
 
-!movePaddle2_down:
+.p2_down:
 	BIT	$03, D
-	JR	Z, movePaddle_end
+	JR	Z, .end
 	LD	HL, (paddle2pos)
 	LD	A, PADDLE_BOTTOM
 	CALL	CheckBottom
-	JR	Z, movePaddle_end
+	JR	Z, .end
 	CALL	NextScan
 	LD	(paddle2pos), HL
 
-!movePaddle_end
+.end
 	RET
 
 ;------------------------------------------------------------------------------
@@ -116,7 +116,7 @@
 	LD	(countLoopBall), A
 	; If we've not reached our delay limit carry on waiting
 	CP	$06
-	JP	NZ, moveBall_end
+	JP	NZ, .end
 
 	; Finished waiting? Reset delay and proceed to move ball
 	LD	A, $00
@@ -127,9 +127,9 @@
 	; We only want bit 7 which tells us if the ball is moving up or down
 	AND	$80
 	; if bit 7 = 1, ball is moving down
-	JR	NZ, moveBall_down
+	JR	NZ, .down
 
-!moveBall_up:
+.up:
 	; Get current ball position
 	LD	HL, (ballPos)
 	; And ball upper limit
@@ -137,16 +137,16 @@
 	; Check if we've reached the top limit
 	CALL	CheckTop
 	; If we have, we need to change direction
-	JR	Z, moveBall_upChg
+	JR	Z, .upChg
 	; Otherwise get the scanline at Y - 1
 	CALL	PreviousScan
 	; Store the new ball position
 	LD	(ballPos), HL
 	; Deal with horizontal movement
-	JR	moveBall_x
+	JR	.x
 
 ; Here we have reached the upper vertical direction so we need to flip the vertical direction
-!moveBall_upChg:
+.upChg:
 	; Get current settings
 	LD	A, (ballSetting)
 	; Set bit 7 to indicate we now go down
@@ -158,18 +158,18 @@
 	; And store it
 	LD	(ballPos), HL
 	; We're done with UP, move on to horizontal
-	JR	moveBall_x
+	JR	.x
 
-!moveBall_down:
+.down:
 	LD	HL, (ballPos)
 	LD	A, BALL_BOTTOM
 	CALL	CheckBottom
-	JR	Z, moveBall_downChg
+	JR	Z, .downChg
 	CALL	NextScan
 	LD	(ballPos), HL
-	JR	moveBall_x
+	JR	.x
 
-!moveBall_downChg:
+.downChg:
 	; Get current settings value
 	LD	A, (ballSetting)
 	; And set vertical direction to down (0) by clearing the bit with AND
@@ -181,28 +181,28 @@
 	; And store the new ball position
 	LD	(ballPos), HL
 
-!moveBall_x:
+.x:
 	; Get current settings and check bit 6
 	LD	A, (ballSetting)
 	AND	$40
 	; If it's 1 then move to the LEFT
-	JR	NZ, moveBall_left
+	JR	NZ, .left
 
 	; Otherwise continue to move to the right
-!moveBall_right:
+.right:
 	; Load ball offset and see if it is the last
 	LD	A, (ballRotation)
 	CP	$08
 	; If so jump to deal with that
-	JR 	Z, moveBall_rightLast
+	JR 	Z, .rightLast
 	; If not, increment, store and jumpt to the end
 	INC	A
 	LD	(ballRotation), A
-	JR	moveBall_end
+	JR	.end
 
 	; If we were on the last offset but not the right border, we move to the
 	; next column, otherwise we need to change direction
-!moveBall_rightLast:
+.rightLast:
 	; Load ball position
 	LD	A, (ballPos)
 	; Mask just the column
@@ -210,7 +210,7 @@
 	; Check if we need to change direction because we're at the edge
 	CP	MARGIN_RIGHT
 	; Jump if we do
-	JR	Z, moveBall_rightChg
+	JR	Z, .rightChg
 	; Otherwise load the current position
 	LD	HL, ballPos
 	; Increment will move to the next column
@@ -219,9 +219,9 @@
 	LD	A, $01			; FIXME: Shouldn't this be 0 ?
 	LD	(ballRotation), A
 	; We're done
-	JR	moveBall_end
+	JR	.end
 
-!moveBall_rightChg:
+.rightChg:
 	; Load current setting
 	LD	A, (ballSetting)
 	; Set the horizontal bit to left (1)
@@ -233,23 +233,23 @@
 	; And store
 	LD	(ballRotation), A
 	; And we're done
-	JR	moveBall_end
+	JR	.end
 
-!moveBall_left:
+.left:
 	; Load offset
 	LD	A, (ballRotation)
 	; Are we on the last offset?
 	CP	$F8
 	; We are so we need to change column. Jump to it
-	JR	Z, moveBall_leftLast
+	JR	Z, .leftLast
 	; We're not on the last offset so just decrement it
 	DEC	A
 	; Store it
 	LD	(ballRotation), A
 	; And we're done
-	JR	moveBall_end
+	JR	.end
 
-!moveBall_leftLast:
+.leftLast:
 	; Load ball position
 	LD	A, (ballPos)	; We can just load A since this will only load the least significant byte
 	; Mask just the column
@@ -257,7 +257,7 @@
 	; Decide if we're at the left edge of the screen
 	CP	MARGIN_LEFT
 	; If we are, we need to change direction
-	JR	Z, moveBall_leftChg
+	JR	Z, .leftChg
 	; Otherwise, then the whole position to HL
 	LD	HL, ballPos
 	; Decrement the value which will move column left by one
@@ -267,9 +267,9 @@
 	; Store it
 	LD	(ballRotation), A
 	; And we're done
-	JR	moveBall_end
+	JR	.end
 
-!moveBall_leftChg:
+.leftChg:
 	; Set offset
 	LD	A, $01
 	; And store
@@ -281,7 +281,7 @@
 	; Store back
 	LD	(ballSetting), A
 
-!moveBall_end:
+.end:
 	RET
 
 	ENDMODULE

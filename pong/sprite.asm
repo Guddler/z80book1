@@ -62,10 +62,10 @@ ballLeft:	DB	$00, $3C	; +8|$08 00000000	00111100 +0|$00
 	CALL	NextScan
 
 	LD	B, $16
-!printPaddle_loop:
+.loop:
 	LD	(HL), PADDLE
 	CALL	NextScan
-	DJNZ	printPaddle_loop
+	DJNZ	.loop
 
 	LD	(HL), ZERO
 	RET

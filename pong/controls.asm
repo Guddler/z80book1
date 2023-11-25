@@ -16,18 +16,18 @@
 	; Ensure D is cleared
 	LD	D, $00
 
-!scanKeys_A:
+.key_A:
 	LD	A, $FD
 	IN	A, ($FE)
 	BIT 	$00, A
-	JR	NZ, scanKeys_Z
+	JR	NZ, .key_Z
 	SET	$00, D
 
-!scanKeys_Z:
+.key_Z:
 	LD	A, $FE
 	IN	A, ($FE)
 	BIT 	$01, A
-	JR	NZ, scanKeys_0
+	JR	NZ, .key_0
 	SET	$01, D
 
 	; If both A & Z have been pressed behave as though neither has been
@@ -38,19 +38,19 @@
 	; Are both keys pressed? (bits 1 & 2 = 3)
 	SUB	$03
 	; If A = 0 then yes, they were, otherwise skip to the next key pair
-	JR	NZ, scanKeys_0
+	JR	NZ, .key_0
 	; Since A now contains 0, use it to zero out D (possible optimisation
 	; here by copying the literal 0 instead of register A contents?)
 	LD	D, A
 
-!scanKeys_0:
+.key_0:
 	LD	A, $EF
 	IN	A, ($FE)
 	BIT 	$00, A
-	JR	NZ, scanKeys_O
+	JR	NZ, .key_O
 	SET	$02, D
 
-!scanKeys_O:
+.key_O:
 	LD	A, $DF
 	IN	A, ($FE)
 	BIT 	$01, A

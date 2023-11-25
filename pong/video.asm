@@ -11,7 +11,7 @@
 @CheckBottom:
 	CALL 	checkVerticalLimit
 	RET	C
-!checkBottom_bottom:
+.bottom:
 	XOR	A
 	RET
 
@@ -37,7 +37,7 @@
 ;	  NZ = Not reached
 ; AF, and BC changed on exit (and obviously the flags)
 ;------------------------------------------------------------------------------
-!checkVerticalLimit:
+checkVerticalLimit:
 	; Store A (vertical limit) in B for safe keeping
 	LD	B, A
 	; Load 1st byte of HL (010TTSSS) in A
@@ -97,12 +97,12 @@
 	; FILL is a solid square
 	LD	A, FILL
 
-!printBorder_loop:
+.loop:
 	LD	(HL), A
 	LD	(DE), A
 	INC	L
 	INC	E
-	DJNZ	printBorder_loop
+	DJNZ	.loop
 	RET
 
 
@@ -120,7 +120,7 @@
 	; We start at line 0 ($4000), column 16 ($0010)
 	LD	HL, $4010
 
-!printLine_loop:
+.loop:
 	; Print a blank in the first scanline
 	LD	(HL), ZERO
 	; Advance to the next line
@@ -130,13 +130,13 @@
 
 	; We will now print 6 scanlines
 	LD	B, $06
-!printLine_loop2:
+.loop2:
 	; This time we print a line
 	LD 	(HL), LINE
 	; We increment to the next scanline
 	INC	H
 	; Keep looping until B = 0
-	DJNZ	printLine_loop2
+	DJNZ	.loop2
 	; Restore B before repating this entire loop
 	POP	BC
 
@@ -145,7 +145,7 @@
 	; Get the next scanline
 	CALL	NextScan
 	; Rinse and repeat until our outer B is 0 (24 lines)
-	DJNZ	printLine_loop
+	DJNZ	.loop
 
 	RET
 
@@ -176,25 +176,25 @@
 
 	; Number of scanlines to be printed
 	LD	B, $06
-reprintLine_loop:
+.loop:
 	LD	A, H
 	AND	$07
 	CP	$01
-	JR	C, reprintLine_00
+	JR	C, .loopZero
 	CP	$07
-	JR	Z, reprintLine_00
+	JR	Z, .loopZero
 	LD	C, LINE
-	JR	reprintLine_loopCont
+	JR	.loopCont
 
-reprintLine_00:
+.loopZero:
 	LD	C, ZERO
 
-reprintLine_loopCont:
+.loopCont:
 	LD	A, (HL)
 	OR	C
 	LD	(HL), A
 	CALL	NextScan
-	DJNZ	reprintLine_loop
+	DJNZ	.loop
 
 	RET
 
@@ -340,26 +340,26 @@ reprintLine_loopCont:
 	CP	$00
 	; If result is positive, we zero A and jump to print right
 	LD	A, $00
-	JP	P, printBall_right
+	JP	P, .right
 	; Otherwise we proceed to print left
 
-!printBall_left:
+.left:
 	; Store the address of the ball bytes in HL
 	LD	HL, ballLeft
 	SUB	C
 	ADD	A, A
 	LD	C, A
 	SBC	HL, BC
-	JR	printBall_continue
+	JR	.continue
 
-!printBall_right:
+.right:
 	LD	HL, ballRight
 	ADD	A, C
 	ADD	A, A
 	LD	C, A
 	ADD	HL, BC
 
-!printBall_continue:
+.continue:
 	EX	DE, HL
 	LD	HL, (ballPos)
 
@@ -371,7 +371,7 @@ reprintLine_loopCont:
 	CALL	NextScan
 
 	LD	B, $04
-!printBall_loop:
+.loop:
 	LD	A, (DE)
 	LD	(HL), A
 	INC	DE
@@ -381,7 +381,7 @@ reprintLine_loopCont:
 	DEC	DE
 	DEC	L
 	CALL	NextScan
-	DJNZ	printBall_loop
+	DJNZ	.loop
 
 	LD	(HL), ZERO
 	INC	L
