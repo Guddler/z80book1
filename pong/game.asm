@@ -25,6 +25,79 @@
 !pTime:	DB	$00
 
 ;------------------------------------------------------------------------------
+; MovePaddles
+; Move the paddles location according to which keys have been pressed.
+;
+; Input: None
+; Output: None
+; AF and HL changed on exit
+;------------------------------------------------------------------------------
+@MovePaddles:
+	; TODO: Make generic and pass in the paddle address. That will involve
+	;	conditionally reading different input keys though so is that
+	; 	a case where it's more efficient to have more code and less logic?
+
+	; Before we do anything, check if our loop counter has expired
+	;
+	; Load and increment ball loop count
+	LD	A, (countLoopPaddles)
+	INC	A
+	; Save the loop count
+	LD	(countLoopPaddles), A
+	; If we've not reached our delay limit carry on waiting
+	CP	$04
+	JR	NZ, movePaddle_end
+
+	; Finished waiting? Reset delay and proceed to move ball
+	LD	A, $00
+	LD	(countLoopPaddles), A
+
+!movePaddle1_up:
+	BIT	$00, D
+	JR	Z, movePaddle1_down
+	LD	HL, (paddle1pos)
+	LD	A, PADDLE_TOP
+	CALL	CheckTop
+	JR	Z, movePaddle2_up
+	CALL	PreviousScan
+	LD	(paddle1pos), HL
+	JR	movePaddle2_up
+
+!movePaddle1_down:
+	BIT	$01, D
+	JR	Z, movePaddle2_up
+	LD	HL, (paddle1pos)
+	LD	A, PADDLE_BOTTOM
+	CALL	CheckBottom
+	JR	Z, movePaddle2_up
+	CALL	NextScan
+	LD	(paddle1pos), HL
+
+!movePaddle2_up:
+	BIT	$02, D
+	JR	Z, movePaddle2_down
+	LD	HL, (paddle2pos)
+	LD	A, PADDLE_TOP
+	CALL	CheckTop
+	JR	Z, movePaddle_end
+	CALL	PreviousScan
+	LD	(paddle2pos), HL
+	JR	movePaddle_end
+
+!movePaddle2_down:
+	BIT	$03, D
+	JR	Z, movePaddle_end
+	LD	HL, (paddle2pos)
+	LD	A, PADDLE_BOTTOM
+	CALL	CheckBottom
+	JR	Z, movePaddle_end
+	CALL	NextScan
+	LD	(paddle2pos), HL
+
+!movePaddle_end
+	RET
+
+;------------------------------------------------------------------------------
 ; MoveBall
 ; Rather complex routine that does what it says on the tin! It takes into account
 ; the change of direction when hitting the borders of the screen.
@@ -34,6 +107,21 @@
 ; AF and HL changed on exit
 ;------------------------------------------------------------------------------
 @MoveBall:
+	; Before we do anything, check if our loop counter has expired
+	;
+	; Load and increment ball loop count
+	LD	A, (countLoopBall)
+	INC	A
+	; Save the loop count
+	LD	(countLoopBall), A
+	; If we've not reached our delay limit carry on waiting
+	CP	$06
+	JP	NZ, moveBall_end
+
+	; Finished waiting? Reset delay and proceed to move ball
+	LD	A, $00
+	LD	(countLoopBall), A
+
 	; Load current ball settings
 	LD	A, (ballSetting)
 	; We only want bit 7 which tells us if the ball is moving up or down
