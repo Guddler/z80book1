@@ -25,7 +25,7 @@ Loop:
 	; Save the loop count
 	LD	(countLoopBall), A
 	; If we've not reached our delay limit carry on waiting
-	CP	$2F
+	CP	$1F
 	JR	NZ, loop_continue
 
 	; Finished waiting? Move ball and reset delay
@@ -37,7 +37,7 @@ loop_continue:
 	; Print ball and loop
 	CALL 	PrintBall
 	CALL	ReprintLine
-	
+
 	JR	Loop
 
 countLoopBall:	DB	$00
