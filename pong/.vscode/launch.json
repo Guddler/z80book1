@@ -45,7 +45,7 @@
 				"zxInterface2Joy": false,
 				"kempstonJoy": false,
 				"zxBeeper": false,
-				"cpuFrequency": 3500000.0,
+				// "cpuFrequency": 3500000.0,
 				"updateFrequency": 100
 			},
 			"sjasmplus": [

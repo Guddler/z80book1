@@ -1,25 +1,45 @@
-	sldopt COMMENT wpmem, logpoint, assertion
+	SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
 	device	zxspectrum128
 
 	ORG	$8000
-
-	include "video.asm"
-	include "controls.asm"
-	include "sprite.asm"
 
 ; start is used by the compiler to create the SNA so has to be first
 start:
 	; Temporary ball test
 
+	EI
 	; Set the border to red
 	LD	A, $02
 	OUT	($FE), A
 	; Set an initial ball rotation of 0
-	LD	A, $00
-	LD	(ballRotation), A
+	; LD	A, $00
+	; LD	(ballRotation), A
+	CALL	Cls
+	CALL	PrintLine
+	CALL	PrintBorder
 
 Loop:
-	CALL PrintBall
+	; Load an increment out loop count
+	LD	A, (countLoopBall)
+	INC	A
+	; Save the loop count
+	LD	(countLoopBall), A
+	; If we've not reached our delay limit carry on waiting
+	CP	$2F
+	JR	NZ, loop_continue
+
+	; Finished waiting? Move ball and reset delay
+	CALL	MoveBall
+	LD	A, $00
+	LD	(countLoopBall), A
+
+loop_continue:
+	; Print ball and loop
+	CALL 	PrintBall
+	JR	Loop
+
+countLoopBall:	DB	$00
+
 loop_cont:
 	LD	B, $08
 loopRight:
@@ -117,5 +137,10 @@ loopLeft:
 ; 	CALL	PrintPaddle
 
 ; 	JR	loop
+
+	include "video.asm"
+	include "controls.asm"
+	include "sprite.asm"
+	include "game.asm"
 
 	SAVESNA "build/pong.sna", start

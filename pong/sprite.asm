@@ -4,6 +4,8 @@ PADDLE_BOTTOM:	EQU	$A8	; TTLLLSSS
 PADDLE_TOP:	EQU	$00	; TTLLLSSS
 BALL_BOTTOM:	EQU	$BA	; TTLLLSSS
 BALL_TOP:	EQU	$00	; TTLLLSSS
+MARGIN_LEFT:	EQU	$00
+MARGIN_RIGHT:	EQU	$1e
 
 ; VARS
 paddle1pos:	DW	$4861	; 010T TSSS LLLC CCCC
@@ -19,6 +21,7 @@ ballSetting:	DB	$00	; 7	Y Dir (0 up, 1 down)
 ZERO:		EQU	$00	; 00000000
 LINE:		EQU	$80	; 00010000
 PADDLE:		EQU	$3C	; 00111100
+FILL:		EQU	$FF	; 11111111
 
 ; Ball sprite. This is like Manic miner where you don't move the ball to the
 ; right by 1 pixel, you have 8 different sprites, each with the ball shifted 1
@@ -43,7 +46,7 @@ ballRight:	DB	$3C, $00	; +0|$00 00111100	00000000 -8|$F8
 		DB	$00, $78	; +7|$07 00000000	01111000 -1|$FF
 ballLeft:	DB	$00, $3C	; +8|$08 00000000	00111100 +0|$00
 
-	module sprite
+	MODULE sprite
 
 ;------------------------------------------------------------------------------
 ; PrintPaddle
@@ -67,4 +70,4 @@ ballLeft:	DB	$00, $3C	; +8|$08 00000000	00111100 +0|$00
 	LD	(HL), ZERO
 	RET
 
-	endmodule
+	ENDMODULE

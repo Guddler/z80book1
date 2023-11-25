@@ -1,4 +1,4 @@
-	module video
+	MODULE video
 
 ;------------------------------------------------------------------------------
 ; CheckBottom
@@ -76,6 +76,35 @@
 	; Compare to B
 	CP	B
 	RET
+
+;------------------------------------------------------------------------------
+; PrintBorder
+; Paints the of the game
+;
+; Input: None
+; Output: None
+; AF, B and HL changed on exit
+;------------------------------------------------------------------------------
+@PrintBorder:
+	; Setup
+	;
+	; 4100 = Third 0, line 0, scanline 1, column 0
+	LD	HL, $4100	; 0100 0001 0000 0000
+	; 56E0 = Third 2, line 7, scanline 6, column 0
+	LD	DE, $56E0	; 0101 0110 1110 0000
+	; 20 = 32 columns
+	LD	B, $20
+	; FILL is a solid square
+	LD	A, FILL
+
+!printBorder_loop:
+	LD	(HL), A
+	LD	(DE), A
+	INC	L
+	INC	E
+	DJNZ	printBorder_loop
+	RET
+
 
 ;------------------------------------------------------------------------------
 ; PrintLine
@@ -287,9 +316,9 @@
 
 	LD	(HL), ZERO
 	INC	L
-	; This probably wants adding back in!
-	;LD	(HL), ZERO
-	;DEC	L
+
+	LD	(HL), ZERO
+	DEC	L
 	CALL	NextScan
 
 	LD	B, $04
@@ -310,4 +339,4 @@
 	LD	(HL), ZERO
 	RET
 
-	endmodule
+	ENDMODULE
