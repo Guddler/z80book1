@@ -1,0 +1,31 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build (sjasmplus)",
+			"type": "shell",
+			"command": "$HOME/Dev/Spectrum/bin/sjasmplus",
+			"args": [
+				"--fullpath",
+				"--sld=${workspaceFolder}/build/pong.sld",
+				"${workspaceFolder}/main.asm"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "never",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": true,
+				"revealProblems": "onProblem"
+			},
+			"problemMatcher": "$problem-matcher-sjasmplus"
+		}
+	]
+}

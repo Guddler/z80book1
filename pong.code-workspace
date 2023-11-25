@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "pong"
+		},
+	],
+	"settings": {
+		"editor.tabSize": 4,
+		"files.associations": {
+			// "*.{z80,asm,inc}": "z80-macroasm"
+		},
+	}
+}
