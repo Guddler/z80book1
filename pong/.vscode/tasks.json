@@ -9,6 +9,7 @@
 			"command": "$HOME/Dev/Spectrum/bin/sjasmplus",
 			"args": [
 				"--fullpath",
+				"--syntax=f",
 				"--sld=${workspaceFolder}/build/pong.sld",
 				"${workspaceFolder}/main.asm"
 			],

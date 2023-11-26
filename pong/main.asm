@@ -1,12 +1,17 @@
 	SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
-	device	zxspectrum128
+	device	ZXSPECTRUM48
 
 	ORG	$8000
 
 ; start is used by the compiler to create the SNA so has to be first
-start:
+codeStart:
 	; Setup
+
+	; We need to explicitly enable interrupts for SNA since the snapshot
+	; loader code disables interrupts so we are working from a known clean
+	; slate but it's not a bad idea for TAP too...
 	EI
+
 	; Set the border to red
 	LD	A, $02
 	OUT	($FE), A
@@ -44,9 +49,16 @@ countLoopBall:		DB	$00
 countLoopPaddles:	DB	$00
 
 
-	include "video.asm"
-	include "controls.asm"
-	include "sprite.asm"
-	include "game.asm"
+	INCLUDE 	"video.asm"
+	INCLUDE 	"controls.asm"
+	INCLUDE 	"sprite.asm"
+	INCLUDE 	"game.asm"
 
-	SAVESNA "build/pong.sna", start
+codeLen	= $-codeStart
+
+	; Snapshot for ZSim
+	SAVESNA 	"build/pong.sna", codeStart
+
+	; Tap file using loader from sjasmplus example lib
+	INCLUDE 	"loader.asm"
+	MakeTape	ZXSPECTRUM48, "build/pong.tap", "PONG", codeStart, codeLen, codeStart

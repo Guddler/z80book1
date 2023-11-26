@@ -13,6 +13,8 @@
 ; Output: None
 ; AF and HL changed on exit
 ;------------------------------------------------------------------------------
+	IFUSED
+
 @Wait:	LD	HL, pTime	; previous time setting
 	LD	A, (23672)	; current timer setting.
         SUB	(HL)		; difference between the two.
@@ -23,6 +25,8 @@
 	LD	(HL),  A	; store this setting.
 	RET
 pTime:	DB	$00
+
+	ENDIF
 
 ;------------------------------------------------------------------------------
 ; MovePaddles

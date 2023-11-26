@@ -27,17 +27,17 @@
 			},
 			"startAutomatically": true,
 			"rootFolder": "${workspaceFolder}",
-			"load": "${workspaceFolder}/build/pong.sna",
+			"load": "${workspaceFolder}/build/pong.tap",
 			"preLaunchTask": "Build (sjasmplus)"
 		},
 		{
 			"type": "dezog",
 			"request": "launch",
-			"name": "Simulator - ZX128K Spectrum",
+			"name": "Simulator - ZX48K Spectrum",
 			"remoteType": "zsim",
 			"zsim": {
 				"visualMemory": true,
-				"memoryModel": "ZX128K",
+				"memoryModel": "ZX48K",
 				"ulaScreen": true,
 				"zxBorderWidth": 25,
 				"vsyncInterrupt": true,
