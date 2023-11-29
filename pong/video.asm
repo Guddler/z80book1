@@ -31,8 +31,8 @@
 ; checkVerticalLimit
 ;
 ;
-; Input: A -> Vertical limit (TTLL LSSS)
-;	 HL -> Current position (010T TSSS LLLC CCCC)
+; Input: A -> Vertical limit (TTRR RSSS)
+;	 HL -> Current position (010T TSSS RRRC CCCC)
 ; Output: Z = Reached
 ;	  NZ = Not reached
 ; AF, and BC changed on exit (and obviously the flags)
@@ -66,7 +66,7 @@ checkVerticalLimit:
 	LD	A, L
 	; Keep the left 3 bits
 	AND	$E0
-	; Shift right twice so LLL is in bits 5 to 3
+	; Shift right twice so RRR is in bits 5 to 3
 	RRCA
 	RRCA
 	; Merge this portion with C
@@ -88,9 +88,9 @@ checkVerticalLimit:
 @PrintBorder:
 	; Setup
 	;
-	; 4100 = Third 0, line 0, scanline 1, column 0
+	; 4100 = Third 0, scanline 1, row 0, column 0
 	LD	HL, $4100	; 0100 0001 0000 0000
-	; 56E0 = Third 2, line 7, scanline 6, column 0
+	; 56E0 = Third 2, scanline 6, row 7, column 0
 	LD	DE, $56E0	; 0101 0110 1110 0000
 	; 20 = 32 columns
 	LD	B, $20
@@ -115,15 +115,15 @@ checkVerticalLimit:
 ; AF, B and HL changed on exit
 ;------------------------------------------------------------------------------
 @PrintLine:
-	; We will loop over all 24 lines of the screen
+	; We will loop over all 24 rows of the screen
 	LD	B, $18
-	; We start at line 0 ($4000), column 16 ($0010)
+	; We start at row 0 ($4000), column 16 ($0010)
 	LD	HL, $4010
 
 .loop:
 	; Print a blank in the first scanline
 	LD	(HL), ZERO
-	; Advance to the next line
+	; Advance to the next row
 	INC	H
 	; Save BC for the next time through the loop (we reuse B as the count)
 	PUSH	BC
@@ -249,10 +249,10 @@ checkVerticalLimit:
 
 ;------------------------------------------------------------------------------
 ; Screen addressing:
-;    	010T TSSS LLLC CCCC
+;    	010T TSSS RRRC CCCC
 ;	T: Third 	- 0 top, 2 bottom
 ;	S: Scan Line 	- 0 top, 7 bottom (line in 8x8 block)
-;	L: Line		- 0 top, 7 bottom (8x8 blocks, 8 per third, 24 total)
+;	R: Row		- 0 top, 7 bottom (8x8 blocks, 8 per third, 24 total)
 ;	C: Column	- 0 left, 31 right (8x8 blocks, 32 total)
 ;------------------------------------------------------------------------------
 
