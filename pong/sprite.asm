@@ -6,7 +6,9 @@ BALL_BOTTOM:	EQU	$B8	; TTRRRSSS
 BALL_TOP:	EQU	$02	; TTRRRSSS
 MARGIN_LEFT:	EQU	$00
 MARGIN_RIGHT:	EQU	$1E
-
+CROSS_LEFT:	EQU	$01	; X collision column left
+CROSS_RIGHT:	EQU	$1D	; X collision column right
+				; Y collision is by 3rd + scanline + row
 
 ; VARS
 paddle1pos:	DW	$4861	; 010T TSSS RRRC CCCC

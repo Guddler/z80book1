@@ -29,7 +29,7 @@
 
 ;------------------------------------------------------------------------------
 ; checkVerticalLimit
-;
+; Evaluates whether the vertical limit has been reached.
 ;
 ; Input: A -> Vertical limit (TTRR RSSS)
 ;	 HL -> Current position (010T TSSS RRRC CCCC)
@@ -40,37 +40,8 @@
 checkVerticalLimit:
 	; Store A (vertical limit) in B for safe keeping
 	LD	B, A
-	; Load 1st byte of HL (010TTSSS) in A
-	LD	A, H
-	; Keep only the third (TT)
-	AND	$18
-	; Rotate A to the left 3 times so TT is now in bits 6 & 7
-	; This matches out limit value stored in A
-	RLCA
-	RLCA
-	RLCA
-	; Keep the value so far in C
-	LD	C, A
-
-	; Now repeat for the scan line portion of H (bits 0-2)
-	; Reload H into A
-	LD	A, H
-	; Keep the first 3 bits
-	AND	$07
-	; Add the scanline portion from C
-	OR	C
-	; And store back in C so now C contains TTxxxSSS
-	LD	C, A
-
-	; Now repeat for the line portion of L (bits 5-7)
-	LD	A, L
-	; Keep the left 3 bits
-	AND	$E0
-	; Shift right twice so RRR is in bits 5 to 3
-	RRCA
-	RRCA
-	; Merge this portion with C
-	OR	C
+	; Get Y-Coordinate (TTRRRSSS) of the current position
+	CALL	GetPtrY
 
 	; Now for the actual vertical limit check...
 	; Compare to B
@@ -256,6 +227,47 @@ checkVerticalLimit:
 ;	C: Column	- 0 left, 31 right (8x8 blocks, 32 total)
 ;------------------------------------------------------------------------------
 
+
+;------------------------------------------------------------------------------
+; GetPtrY
+; Get Y position of screen location in TTRRRSSS format
+;
+; Input: HL -> Screen location (memory address) [H:010T TSSS L:RRRC CCCC]
+; Output: A -> Y position (TTRRRSSS)
+; AF, and E changed on exit
+;------------------------------------------------------------------------------
+@GetPtrY:
+	; Load most significan byte (3rd and Scanline)
+	LD	A, H
+	; Keep just the third
+	AND	$18
+	; Rotate into position
+	RLCA
+	RLCA
+	RLCA
+	; And store in E for safe keeping
+	LD	E, A
+
+	; Repeat for the scanline
+	LD	A, H
+	; Keep just the scanline
+	AND	$07
+	; Add what we have already stored in E to what we now have in A
+	OR	E
+	; and update our stored value back to E
+	LD	E, A
+
+	; Repeat for the row
+	LD	A, L
+	; Mask off the ROW
+	AND	$E0
+	; Rotate into place (>>2)
+	RRCA
+	RRCA
+	; Again, add existing E
+	OR	E
+	; We don't need to store it this time, just return what we have in A
+	RET
 
 ;------------------------------------------------------------------------------
 ; NextScan
