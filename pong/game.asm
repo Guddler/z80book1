@@ -29,6 +29,150 @@ pTime:	DB	$00
 	ENDIF
 
 ;------------------------------------------------------------------------------
+; CheckBallCross
+; Check for a collision between ball and paddle (both X & Y checks)
+;
+; NB: 	The whole 'return if there's no collision' and keep going to the end if
+; 	there is seems a little backwards to me!?!
+;
+; Input:
+; Output:
+; AF, C and HL changed on exit
+;------------------------------------------------------------------------------
+@CheckBallCross:
+	; Get the current ball setting
+	LD	A, (ballSetting)
+	; And mask just the direction bit (bit 6)
+	AND	$40
+	; 1 means the ball is travelling left so we need to check paddle 1
+	JR	NZ, .left
+
+	; Check against paddle 2 as the ball is travelling right
+.right:
+	; Load the right collision check value
+	LD	C, CROSS_RIGHT
+	; Check for X collision
+	CALL	CheckCrossX
+	; If there is no collision, stop here and exit
+	RET	NZ
+	; If not, load the paddle position
+	LD	HL, (paddle2pos)
+	; And check for Y collision
+	CALL	CheckCrossY
+	; If there is no collision, return
+	RET	NZ
+
+	; If we get here, there was a collision
+	;
+	; Get ball properties
+	LD	A, (ballSetting)
+	; Set direction to left
+	OR	$40
+	; And store
+	LD	(ballSetting), A
+	; Set the ball offset to $FF
+	LD	A, $FF
+	LD	(ballRotation), A
+
+	; And we're done
+	RET
+
+	; Check against paddle 1 as the ball is travelling left
+.left:
+	; Load the lft collision check value
+	LD	C, CROSS_LEFT
+	; Check for X collision
+	CALL	CheckCrossX
+	; If there is no collision exit
+	RET	NZ
+	; Otherwise load the paddle position
+	LD	HL, (paddle1pos)
+	; Check for Y collision
+	CALL	CheckCrossY
+	; Again, if no collision, exit
+	RET	NZ
+
+	; As before, we got here so there was a collision
+	;
+	; Get ball properties
+	LD	A, (ballSetting)
+	; Set direction to right (by ignoring bit 6 and storing back to A)
+	AND	$BF
+	; And store the result
+	LD	(ballSetting), A
+	; Set the ball offset to $01
+	LD	A, $01
+	LD	(ballRotation), A
+
+	; And again, we're done
+	RET
+
+;------------------------------------------------------------------------------
+; CheckCrossX
+; Check for a collision on the X axis
+;
+; Input: C -> Collision column (CROSS_LEFT or CROSS_RIGHT)
+; Output: Z -> Collision, NZ -> No collision
+; AF changed on exit
+;------------------------------------------------------------------------------
+@CheckCrossX:
+	; Get the Column of the ball
+	LD	A, (ballPos)
+	AND	$1F
+	; Compare to C. Z will be set on exit if there was a collision
+	CP	C
+	RET
+
+;------------------------------------------------------------------------------
+; CheckCrossY
+; Check for a collision on the Y axis
+;
+; Input: HL -> Position of paddle (used by GetPtrY call)
+; 	 C -> Collision column (CROSS_LEFT or CROSS_RIGHT)
+; Output: Z -> Collision, NZ -> No collision
+; AF changed on exit
+;------------------------------------------------------------------------------
+@CheckCrossY:
+	CALL	GetPtrY
+	; Skip the first scanline since it's not filled
+	INC	A
+	; Load into C
+	LD	C, A
+	; Get Y scanline of the ball
+	LD	HL, (ballPos)
+	CALL	GetPtrY
+	; Store it in B
+	LD	B, A
+	; We move to the penultimate scanline of the ball
+	ADD	A, $04
+	; Subtract the Y coordinate of the paddle (in C)
+	SUB	C
+	; In this case a carry means the ball passed over the top of the paddle
+	; so we exit with Z not set (NZ = Collision false)
+	RET	C
+
+	; Still here so load Y pos of paddle into A again
+	LD	A, C
+	; Add $16 to move to the penultimate scanline so we can repeat the check
+	ADD	A, $16
+	; Store in C
+	LD	C, A
+	; Pull back the Y pos of the ball (previously stored in B)
+	LD	A, B
+	; This time we look to the first non blank line from the top of the ball
+	INC	A
+	; And repeat the same check as before
+	SUB	C
+	; No carry means the ball passed through the first scanline which is OK
+	; (NZ = COllision False)
+	RET	NC
+	; Clear A, thus setting Z (Z = Collision True)
+	XOR	A
+	; Return
+	RET
+
+
+;------------------------------------------------------------------------------
 ; MovePaddles
 ; Move the paddles location according to which keys have been pressed.
 ;

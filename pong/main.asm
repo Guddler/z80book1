@@ -26,13 +26,16 @@ codeStart:
 Loop:
 	CALL	MoveBall
 
-	; Print ball and loop
-	CALL 	PrintBall
-	CALL	ReprintLine
-
 	; Read player input and move paddles
 	CALL	ScanKeys
 	CALL	MovePaddles
+
+	; Check for collisions
+	CALL	CheckBallCross
+
+	; Print ball and loop
+	CALL 	PrintBall
+	CALL	ReprintLine
 
 	; Draw paddles
 	LD 	HL, (paddle1pos)
