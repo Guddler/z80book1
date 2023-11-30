@@ -50,6 +50,8 @@ Loop:
 	; VARs
 countLoopBall:		DB	$00
 countLoopPaddles:	DB	$00
+p1Score:		DB	$00
+p2Score:		DB	$00
 
 
 	INCLUDE 	"video.asm"

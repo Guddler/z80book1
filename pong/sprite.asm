@@ -9,6 +9,9 @@ MARGIN_RIGHT:	EQU	$1E
 CROSS_LEFT:	EQU	$01	; X collision column left
 CROSS_RIGHT:	EQU	$1D	; X collision column right
 				; Y collision is by 3rd + scanline + row
+POINTS_P1:	EQU	$450D	; 010T TSSS RRRC CCCC
+POINTS_P2:	EQU	$4511	; 010T TSSS RRRC CCCC
+
 
 ; VARS
 paddle1pos:	DW	$4861	; 010T TSSS RRRC CCCC
@@ -21,10 +24,45 @@ ballSetting:	DB	$00	; 7	Y Dir (0 up, 1 down)
 				; 0-3	X Speedw
 
 ; Sprite definitions (of sorts)
-ZERO:		EQU	$00	; 00000000
+BLANK:		EQU	$00	; 00000000
 LINE:		EQU	$80	; 00010000
 PADDLE:		EQU	$3C	; 00111100
 FILL:		EQU	$FF	; 11111111
+
+; Score digits 'sprites'
+Zero:
+	DW	whiteSprite, zeroSprite
+One:
+	DW	whiteSprite, oneSprite
+Two:
+	DW	whiteSprite, twoSprite
+Three:
+	DW	whiteSprite, threeSprite
+Four:
+	DW	whiteSprite, fourSprite
+Five:
+	DW	whiteSprite, fiveSprite
+Six:
+	DW	whiteSprite, sixSprite
+Seven:
+	DW	whiteSprite, sevenSprite
+Eight:
+	DW	whiteSprite, eightSprite
+Nine:
+	DW	whiteSprite, nineSprite
+Ten:
+	DW	oneSprite, zeroSprite
+Eleven:
+	DW	oneSprite, oneSprite
+Twelve:
+	DW	oneSprite, twoSprite
+Thirteen:
+	DW	oneSprite, threeSprite
+Fourteen:
+	DW	oneSprite, fourSprite
+Fifteen:
+	DW	oneSprite, fiveSprite
+
 
 ; Ball sprite. This is like Manic miner where you don't move the ball to the
 ; right by 1 pixel, you have 8 different sprites, each with the ball shifted 1
@@ -49,6 +87,45 @@ ballRight:	DB	$3C, $00	; +0|$00 00111100	00000000 -8|$F8
 		DB	$00, $78	; +7|$07 00000000	01111000 -1|$FF
 ballLeft:	DB	$00, $3C	; +8|$08 00000000	00111100 +0|$00
 
+; Score Digits
+;
+; Each digit is 8x16 high, so two bytes. The memory locations are defined above
+;
+	; Empty square (white)
+whiteSprite:
+	; DS $10 means 16 spaces
+	DS	$10
+zeroSprite:
+	DB	$00, $7E, $7E, $66, $66, $66, $66, $66
+	DB	$66, $66, $66, $66, $66, $7E, $7E, $00
+oneSprite:
+	DB	$00, $18, $18, $18, $18, $18, $18, $18
+	DB	$18, $18, $18, $18, $18, $18, $18, $00
+twoSprite:
+	DB	$00, $7E, $7E, $06, $06, $06, $06, $7E
+	DB	$7E, $60, $60, $60, $60, $7E, $7E, $00
+threeSprite:
+	DB	$00, $7E, $7E, $06, $06, $06, $06, $3E
+	DB	$3E, $06, $06, $06, $06, $7E, $7E, $00
+fourSprite:
+	DB	$00, $66, $66, $66, $66, $66, $66, $7E
+	DB	$7E, $06, $06, $06, $06, $06, $06, $00
+fiveSprite:
+	DB	$00, $7E, $7E, $60, $60, $60, $60, $7E
+	DB	$7E, $06, $06, $06, $06, $7E, $7E, $00
+sixSprite:
+	DB	$00, $7E, $7E, $60, $60, $60, $60, $7E
+	DB	$7E, $66, $66, $66, $66, $7E, $7E, $00
+sevenSprite:
+	DB	$00, $7E, $7E, $06, $06, $06, $06, $06
+	DB	$06, $06, $06, $06, $06, $06, $06, $00
+eightSprite:
+	DB	$00, $7E, $7E, $66, $66, $66, $66, $7E
+	DB	$7E, $66, $66, $66, $66, $7E, $7E, $00
+nineSprite:
+	DB	$00, $7E, $7E, $66, $66, $66, $66, $7E
+	DB	$7E, $06, $06, $06, $06, $7E, $7E, $00
+
 	MODULE sprite
 
 ;------------------------------------------------------------------------------
@@ -61,7 +138,7 @@ ballLeft:	DB	$00, $3C	; +8|$08 00000000	00111100 +0|$00
 ;------------------------------------------------------------------------------
 
 @PrintPaddle:
-	LD	(HL), ZERO
+	LD	(HL), BLANK
 	CALL	NextScan
 
 	LD	B, $16
@@ -70,7 +147,7 @@ ballLeft:	DB	$00, $3C	; +8|$08 00000000	00111100 +0|$00
 	CALL	NextScan
 	DJNZ	.loop
 
-	LD	(HL), ZERO
+	LD	(HL), BLANK
 	RET
 
 	ENDMODULE

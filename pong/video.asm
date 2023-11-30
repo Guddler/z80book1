@@ -93,7 +93,7 @@ checkVerticalLimit:
 
 .loop:
 	; Print a blank in the first scanline
-	LD	(HL), ZERO
+	LD	(HL), BLANK
 	; Advance to the next row
 	INC	H
 	; Save BC for the next time through the loop (we reuse B as the count)
@@ -112,7 +112,7 @@ checkVerticalLimit:
 	POP	BC
 
 	; Print a blank as the last scanline
-	LD	(HL), ZERO
+	LD	(HL), BLANK
 	; Get the next scanline
 	CALL	NextScan
 	; Rinse and repeat until our outer B is 0 (24 lines)
@@ -151,14 +151,14 @@ checkVerticalLimit:
 	LD	A, H
 	AND	$07
 	CP	$01
-	JR	C, .loopZero
+	JR	C, .loopBlank
 	CP	$07
-	JR	Z, .loopZero
+	JR	Z, .loopBlank
 	LD	C, LINE
 	JR	.loopCont
 
-.loopZero:
-	LD	C, ZERO
+.loopBlank:
+	LD	C, BLANK
 
 .loopCont:
 	LD	A, (HL)
@@ -375,10 +375,10 @@ checkVerticalLimit:
 	EX	DE, HL
 	LD	HL, (ballPos)
 
-	LD	(HL), ZERO
+	LD	(HL), BLANK
 	INC	L
 
-	LD	(HL), ZERO
+	LD	(HL), BLANK
 	DEC	L
 	CALL	NextScan
 
@@ -395,9 +395,9 @@ checkVerticalLimit:
 	CALL	NextScan
 	DJNZ	.loop
 
-	LD	(HL), ZERO
+	LD	(HL), BLANK
 	INC	L
-	LD	(HL), ZERO
+	LD	(HL), BLANK
 	RET
 
 	ENDMODULE
