@@ -386,19 +386,11 @@ pTime:	DB	$00
 	LD	HL, p1Score
 	; Add one (NB: INC the value at the address pointed to by HL, not HL)
 	INC	(HL)
-	; And print the new score
+	; And print the new score, clear the ball and set the new direction
 	CALL	PrintScore
+	CALL	ClearBall
+	CALL	SetBallLeft
 
-	; Load current setting
-	LD	A, (ballSetting)
-	; Set the horizontal bit to left (1)
-	OR	$40
-	; Store back
-	LD	(ballSetting), A
-	; Set offset
-	LD	A, $FF
-	; And store
-	LD	(ballRotation), A
 	; And we're done
 	JR	.end
 
@@ -443,19 +435,54 @@ pTime:	DB	$00
 	INC	(HL)
 	; And print the new score
 	CALL	PrintScore
-
-	; Set offset
-	LD	A, $01
-	; And store
-	LD	(ballRotation), A
-	; Load current setting
-	LD	A, (ballSetting)
-	; Set the horizontal bit to right (0)
-	AND	$BF
-	; Store back
-	LD	(ballSetting), A
+	CALL	ClearBall
+	CALL	SetBallRight
 
 .end:
 	RET
 
+
+;------------------------------------------------------------------------------
+; SetBallLeft
+;
+;
+; Input: None
+; Output: None
+; AF and HL changed on exit
+;------------------------------------------------------------------------------
+@SetBallLeft:
+	; Force the ball position to the left
+	LD	HL, $4D62
+	LD	(ballPos), HL
+	; We set the ball offset to the first left offset
+	LD	A, $01
+	LD	(ballRotation), A
+	; We get the ball setting and set the direction to right
+	LD	A, (ballSetting)
+	AND	$BF
+	LD	(ballSetting), A
+
+	RET
+
+;------------------------------------------------------------------------------
+; SetBallRight
+;
+;
+; Input: None
+; Output: None
+; AF and HL changed on exit
+;------------------------------------------------------------------------------
+@SetBallRight:
+	; Force the ball position to the right
+	LD	HL, $4D7C
+	LD	(ballPos), HL
+	; We set the ball offset to the first right offset
+	LD	A, $FF
+	LD	(ballRotation), A
+	; We get the ball setting and set the direction to left
+	LD	A, (ballSetting)
+	OR	$40
+	LD	(ballSetting), A
+
+	RET
 	ENDMODULE

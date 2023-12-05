@@ -182,6 +182,43 @@ checkVerticalLimit:
 ;	0 /					0 - Black;
 ;------------------------------------------------------------------------------
 
+;------------------------------------------------------------------------------
+; ClearBall
+; By calling this routine when the ball has reached a border we can know who
+; won that point and therefore who 'serves' next, before also rasing the ball
+;
+; Input: None
+; Output: Carry if ball was on the left, No Carry if on right
+; AF, B and HL changed on exit
+;------------------------------------------------------------------------------
+@ClearBall:
+	; Load position of ball into HL
+	LD	HL, (ballPos)
+	; Load row and column specifically into A
+	LD	A, L
+	; Mask . keep just the column
+	AND	$1F
+	; And compare it with the centre of the screen
+	CP	$10
+	; If we have a carry then the ball must be at the left border
+	JR	C, .clear
+	; If we got here then the ball is on the right border but we need to
+	; add 1 to the column since the ball is printed 1 column to the right
+	INC	L
+
+.clear:
+	; Clear the ball
+	LD	B, $06	; six lines
+.loop:
+	; Erase the ball line
+	LD	(HL), $0
+	; Get the next scanline
+	CALL	NextScan
+	; And loop 6 times
+	DJNZ	.loop
+
+	;Done
+	RET
 
 ;------------------------------------------------------------------------------
 ; CLS
