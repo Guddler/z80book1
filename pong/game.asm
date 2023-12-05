@@ -268,7 +268,7 @@ pTime:	DB	$00
 	AND	$03
 	; And store in B
 	LD	B, A
-	
+
 	; Load and increment ball loop count
 	LD	A, (countLoopBall)
 	INC	A
@@ -382,6 +382,13 @@ pTime:	DB	$00
 	JR	.end
 
 .rightChg:
+	; Load p1 score
+	LD	HL, p1Score
+	; Add one (NB: INC the value at the address pointed to by HL, not HL)
+	INC	(HL)
+	; And print the new score
+	CALL	PrintScore
+
 	; Load current setting
 	LD	A, (ballSetting)
 	; Set the horizontal bit to left (1)
@@ -430,6 +437,13 @@ pTime:	DB	$00
 	JR	.end
 
 .leftChg:
+	; Load p2 score
+	LD	HL, p2Score
+	; Add one (NB: INC the value at the address pointed to by HL, not HL)
+	INC	(HL)
+	; And print the new score
+	CALL	PrintScore
+
 	; Set offset
 	LD	A, $01
 	; And store
