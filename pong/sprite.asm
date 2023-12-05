@@ -18,10 +18,10 @@ paddle1pos:	DW	$4861	; 010T TSSS RRRC CCCC
 paddle2pos:	DW	$487E	; 010T TSSS RRRC CCCC
 ballPos:	DW	$4870	; 010T TSSS RRRC CCCC
 ballRotation:	DB	$F8	; Right rot: +ve, Left rot: -ve
-ballSetting:	DB	$00	; 7	Y Dir (0 up, 1 down)
+ballSetting:	DB	$30	; 7	Y Dir (0 up, 1 down)
 				; 6	X Dir (0 right, 1 left)
-				; 5-4	Y Speed
-				; 0-3	X Speedw
+				; 5-4	Ball Speed
+				; 0-3	X Speed
 
 ; Sprite definitions (of sorts)
 BLANK:		EQU	$00	; 00000000

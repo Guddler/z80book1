@@ -22,6 +22,7 @@ codeStart:
 	CALL	Cls
 	CALL	PrintLine
 	CALL	PrintBorder
+	CALL	PrintScore
 
 Loop:
 	CALL	MoveBall
@@ -36,6 +37,7 @@ Loop:
 	; Print ball and loop
 	CALL 	PrintBall
 	CALL	ReprintLine
+	CALL	ReprintScore
 
 	; Draw paddles
 	LD 	HL, (paddle1pos)

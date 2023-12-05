@@ -270,6 +270,29 @@ checkVerticalLimit:
 	RET
 
 ;------------------------------------------------------------------------------
+; GetScoreSprite
+; Gets the memory location of the sprite for the given score
+;
+; Input: A -> Score
+; Output: HL -> Address of sprite to draw
+; AF and HL changed on exit
+;------------------------------------------------------------------------------
+@GetScoreSprite:
+	; Load the address of the Zero sprite into HL
+	LD	HL, Zero
+	; Each score sprite is 4 bytes apart
+	LD	BC, $04
+	; Inc A just so our loop can start with a DEC
+	INC	A
+.loop:
+	; So we loop over the score and every time we decrement it we add 4 (BC)
+	; to the address in HL. We end up with a pointer to the correct sprite
+	DEC	A
+	RET	Z
+	ADD	HL, BC
+	JR	.loop
+
+;------------------------------------------------------------------------------
 ; NextScan
 ; Gets the memory location of the next scanline to the one given
 ;
@@ -399,5 +422,249 @@ checkVerticalLimit:
 	INC	L
 	LD	(HL), BLANK
 	RET
+
+;------------------------------------------------------------------------------
+; PrintScore:
+; Prints the player scores
+;
+; Input:
+; Output:
+; AF, BC, DE and HL changed on exit
+;------------------------------------------------------------------------------
+@PrintScore:
+	; Load player 1 score into A
+	LD	A, (p1Score)
+	; And get the sprite pair we need to print
+	CALL	GetScoreSprite
+
+	; After a call to GetScoreSprite, HL contains the address of the first
+	; sprite and HL + 1 the address of the second. Z80 is little endian so
+	; the addresses are LS, MS. SO for example if the location of the sprite
+	; for ONE is $9060 then H = 60, L = 90
+
+	; Push the result onto the stack to preserve it for the second digit
+	PUSH	HL
+	; Load the Least siginificant bit into E
+	LD	E, (HL)
+	; Increment and add the most significant bit into D
+	INC	HL
+	LD	D, (HL)
+	; Now we get the screen location to print P1 score into HL
+	LD	HL, POINTS_P1
+	; And we print the digit
+	CALL	.print
+
+	; Now for the second digit of P1 score
+	;
+	; Retrieve our saved HL
+	POP	HL
+	; INC twice to get the address of digit 2 since it points to digit 1
+	INC	HL
+	INC	HL
+
+	; This is a bit of a repeat of above so can probably be optimised
+	;
+	; Load LSB into E
+	LD	E, (HL)
+	; Increment and add the most significant bit into D
+	INC	HL
+	LD	D, (HL)
+	; Now we get the screen location to print P1 score into HL
+	LD	HL, POINTS_P1
+	; Unlike last time we increment to the next position
+	INC	L
+
+	; And we print the digit
+	CALL	.print
+
+	; Player 2 score - this is basically a repeat of eveything above
+
+	; Load player 2 score into A
+	LD	A, (p2Score)
+	; And get the sprite pair we need to print
+	CALL	GetScoreSprite
+
+	; Push the result onto the stack to preserve it for the second digit
+	PUSH	HL
+	; Load the Least siginificant bit into E
+	LD	E, (HL)
+	; Increment and add the most significant bit into D
+	INC	HL
+	LD	D, (HL)
+	; Now we get the screen location to print P1 score into HL
+	LD	HL, POINTS_P2
+	; And we print the digit
+	CALL	.print
+
+	; Now for the second digit of P1 score
+	;
+	; Retrieve our saved HL
+	POP	HL
+	; INC twice to get the address of digit 2 since it points to digit 1
+	INC	HL
+	INC	HL
+
+	; This is a bit of a repeat of above so can probably be optimised
+	;
+	; Load LSB into E
+	LD	E, (HL)
+	; Increment and add the most significant bit into D
+	INC	HL
+	LD	D, (HL)
+	; Now we get the screen location to print P1 score into HL
+	LD	HL, POINTS_P2
+	; Unlike last time we increment to the next position
+	INC	L
+
+.print:
+	; Each time we get here HL is the location to print the sprite and DE
+	; points to the sprite itself
+
+	; Each digit is 16 scan lines
+	LD	B, $10
+	; Save the sprite address and the print address
+	PUSH	DE
+	PUSH	HL
+.loop:
+	; Load the byte we need to paint
+	LD	A, (DE)
+	; And copy it to the required screen location
+	LD	(HL), A
+	; Move to the next byte
+	INC	DE
+	; Get the next scanline into HL
+	CALL	NextScan
+	; Repeat for all 16 lines (B = 0)
+	DJNZ	.loop
+
+	; Restore our saved values in reverse order (important!)
+	POP	HL
+	POP	DE
+	; And return. For either internally or completely out when we're done
+	RET
+
+;------------------------------------------------------------------------------
+; ReprintScore:
+; Reprints the player scores, ensuring that they aren't erased by the ball
+;
+; Input:
+; Output:
+; AF, BC, DE and HL changed on exit
+;------------------------------------------------------------------------------
+@ReprintScore:
+	; Load player 1 score into A
+	LD	A, (p1Score)
+	; And get the sprite pair we need to print
+	CALL	GetScoreSprite
+
+	; After a call to GetScoreSprite, HL contains the address of the first
+	; sprite and HL + 1 the address of the second. Z80 is little endian so
+	; the addresses are LS, MS. SO for example if the location of the sprite
+	; for ONE is $9060 then H = 60, L = 90
+
+	; Push the result onto the stack to preserve it for the second digit
+	PUSH	HL
+	; Load the Least siginificant bit into E
+	LD	E, (HL)
+	; Increment and add the most significant bit into D
+	INC	HL
+	LD	D, (HL)
+	; Now we get the screen location to print P1 score into HL
+	LD	HL, POINTS_P1
+	; And we print the digit
+	CALL	.print
+
+	; Now for the second digit of P1 score
+	;
+	; Retrieve our saved HL
+	POP	HL
+	; INC twice to get the address of digit 2 since it points to digit 1
+	INC	HL
+	INC	HL
+
+	; This is a bit of a repeat of above so can probably be optimised
+	;
+	; Load LSB into E
+	LD	E, (HL)
+	; Increment and add the most significant bit into D
+	INC	HL
+	LD	D, (HL)
+	; Now we get the screen location to print P1 score into HL
+	LD	HL, POINTS_P1
+	; Unlike last time we increment to the next position
+	INC	L
+
+	; And we print the digit
+	CALL	.print
+
+	; Player 2 score - this is basically a repeat of eveything above
+
+	; Load player 2 score into A
+	LD	A, (p2Score)
+	; And get the sprite pair we need to print
+	CALL	GetScoreSprite
+
+	; Push the result onto the stack to preserve it for the second digit
+	PUSH	HL
+	; Load the Least siginificant bit into E
+	LD	E, (HL)
+	; Increment and add the most significant bit into D
+	INC	HL
+	LD	D, (HL)
+	; Now we get the screen location to print P1 score into HL
+	LD	HL, POINTS_P2
+	; And we print the digit
+	CALL	.print
+
+	; Now for the second digit of P1 score
+	;
+	; Retrieve our saved HL
+	POP	HL
+	; INC twice to get the address of digit 2 since it points to digit 1
+	INC	HL
+	INC	HL
+
+	; This is a bit of a repeat of above so can probably be optimised
+	;
+	; Load LSB into E
+	LD	E, (HL)
+	; Increment and add the most significant bit into D
+	INC	HL
+	LD	D, (HL)
+	; Now we get the screen location to print P1 score into HL
+	LD	HL, POINTS_P2
+	; Unlike last time we increment to the next position
+	INC	L
+
+.print:
+	; Each time we get here HL is the location to print the sprite and DE
+	; points to the sprite itself
+
+	; Each digit is 16 scan lines
+	LD	B, $10
+	; Save the sprite address and the print address
+	PUSH	DE
+	PUSH	HL
+.loop:
+	; Load the byte we need to paint
+	LD	A, (DE)
+	; Important! Mix with what's already on screen so it doesn't get
+	; overridden and erased by the ball
+	OR	(HL)
+	; And copy it to the required screen location
+	LD	(HL), A
+	; Move to the next byte
+	INC	DE
+	; Get the next scanline into HL
+	CALL	NextScan
+	; Repeat for all 16 lines (B = 0)
+	DJNZ	.loop
+
+	; Restore our saved values in reverse order (important!)
+	POP	HL
+	POP	DE
+	; And return. For either internally or completely out when we're done
+	RET
+
 
 	ENDMODULE

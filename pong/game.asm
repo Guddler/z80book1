@@ -257,13 +257,25 @@ pTime:	DB	$00
 @MoveBall:
 	; Before we do anything, check if our loop counter has expired
 	;
+	; We now get our ball speed (and thus the loop limit from ball setting)
+	LD	A, (ballSetting)
+	; We rotate bits 5 & 4 to bits 0 & 1
+	RRCA
+	RRCA
+	RRCA
+	RRCA
+	; Keep just the 2 bits we want
+	AND	$03
+	; And store in B
+	LD	B, A
+	
 	; Load and increment ball loop count
 	LD	A, (countLoopBall)
 	INC	A
 	; Save the loop count
 	LD	(countLoopBall), A
 	; If we've not reached our delay limit carry on waiting
-	CP	$06
+	CP	B
 	JP	NZ, .end
 
 	; Finished waiting? Reset delay and proceed to move ball
