@@ -24,6 +24,29 @@ codeStart:
 	CALL	PrintBorder
 	CALL	PrintScore
 
+	; Before main loop, wait for the someone to press 5 to start
+	CALL	WaitStart
+	; Reset scores from any previous game
+	;
+	; Clear A
+	XOR	A
+	; Set both scores to 0
+	LD	(p1Score), A
+	LD	(p2Score), A
+	; Print new score
+	CALL	PrintScore
+
+	; Reset ball speed
+	;
+	; Load current ball setting
+	LD	A, (ballSetting)
+	; And clear bits 5 & 4 (ball speed)
+	AND	$CF
+	; Set bits 5 & 6 to 03
+	OR	$30
+	; And save the setting
+	LD	(ballSetting), A
+
 Loop:
 	CALL	MoveBall
 
@@ -44,6 +67,15 @@ Loop:
 	CALL	PrintPaddle
 	LD	HL, (paddle2pos)
 	CALL	PrintPaddle
+
+	; Check for a win
+	LD	A, (p1Score)
+	CP	$0F
+	JR	Z, codeStart
+
+	LD	A, (p2Score)
+	CP 	$0f
+	JR	Z, codeStart
 
 	JR	Loop
 

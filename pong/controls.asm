@@ -133,4 +133,26 @@
 
 	RET
 
+;------------------------------------------------------------------------------
+; WaitStart
+; Waits for the 5 key to be pressed
+;
+; Input: None
+; Output: None
+; Alters: A and F registers
+;------------------------------------------------------------------------------
+@WaitStart:
+	; Set half-row for keys 1-5 (F7)
+	LD	A, $F7
+	; Poll the keyboard
+	IN	A, ($FE)
+	; Check for bit 4
+	BIT	$04, A
+	; Not pressed?, loop
+	JR	NZ, WaitStart
+	; Done
+	RET
+
+
+
 	ENDMODULE
