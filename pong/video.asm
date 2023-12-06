@@ -226,6 +226,15 @@ checkVerticalLimit:
 ;
 ;------------------------------------------------------------------------------
 @Cls:
+	; LDIR : Repeats 'LD (DE),(HL)', increments DE, HL, and decrements BC
+	; until BC = 0. If BC = 0 on entry it will loop and repeat 255 times
+	;
+	; This is why below we load 0 to HL, then prime DE with 4001 as we're
+	; always copying the value at the previous address into the current one
+	;
+	; This routine is not fast but as long as you don't call it every frame
+	; it really doesn't need to be.
+
 	; Clear video memory
 	;
 	; Load HL with start of screen ram
