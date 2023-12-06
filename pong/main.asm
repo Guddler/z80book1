@@ -47,6 +47,15 @@ codeStart:
 	; And save the setting
 	LD	(ballSetting), A
 
+	; Reset ball position
+	LD	HL, BALL_POS_INI
+	LD	(ballPos), HL
+	; And paddle positions
+	LD	HL, PADDLE1POS_INI
+	LD	(paddle1pos), HL
+	LD	HL, PADDLE2POS_INI
+	LD	(paddle2pos), HL
+
 Loop:
 	CALL	MoveBall
 
@@ -64,20 +73,23 @@ Loop:
 
 	; Draw paddles
 	LD 	HL, (paddle1pos)
+	LD	C, PADDLE1
 	CALL	PrintPaddle
+
 	LD	HL, (paddle2pos)
+	LD	C, PADDLE2
 	CALL	PrintPaddle
 
 	; Check for a win
 	LD	A, (p1Score)
 	CP	$0F
-	JR	Z, codeStart
+	JP	Z, codeStart
 
 	LD	A, (p2Score)
 	CP 	$0f
-	JR	Z, codeStart
+	JP	Z, codeStart
 
-	JR	Loop
+	JP	Loop
 
 	; End main game loop
 

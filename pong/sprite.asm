@@ -2,13 +2,19 @@
 ; CONSTS
 PADDLE_BOTTOM:	EQU	$A6	; TTRRRSSS
 PADDLE_TOP:	EQU	$02	; TTRRRSSS
+PADDLE1POS_INI:	EQU	$4861	; 010T TSSS RRRC CCCC
+PADDLE2POS_INI:	EQU	$487E	; 010T TSSS RRRC CCCC
 BALL_BOTTOM:	EQU	$B8	; TTRRRSSS
 BALL_TOP:	EQU	$02	; TTRRRSSS
+BALL_POS_INI:	EQU	$4850	; Initial ball position
 MARGIN_LEFT:	EQU	$00
 MARGIN_RIGHT:	EQU	$1E
 CROSS_LEFT:	EQU	$01	; X collision column left
 CROSS_RIGHT:	EQU	$1D	; X collision column right
 				; Y collision is by 3rd + scanline + row
+CROSS_LEFT_ROT:	EQU	$FF	; Rotation the ball should have when it
+CROSS_RIGHT_ROT	EQU	$01	; collides with the paddle
+
 POINTS_P1:	EQU	$450D	; 010T TSSS RRRC CCCC
 POINTS_P2:	EQU	$4511	; 010T TSSS RRRC CCCC
 
@@ -18,15 +24,25 @@ paddle1pos:	DW	$4861	; 010T TSSS RRRC CCCC
 paddle2pos:	DW	$487E	; 010T TSSS RRRC CCCC
 ballPos:	DW	$4870	; 010T TSSS RRRC CCCC
 ballRotation:	DB	$F8	; Right rot: +ve, Left rot: -ve
-ballSetting:	DB	$30	; 7	Y Dir (0 up, 1 down)
+ballMoveCount:	DB	$00	; Number of frames ball must take to change dir
+ballSetting:	DB	$31	; Ball speed and direction:
+				; 7	Y Dir (0 up, 1 down)
 				; 6	X Dir (0 right, 1 left)
 				; 5-4	Ball Speed
-				; 0-3	X Speed
+				;	1 - Stupid fast
+				;	2 - Fast
+				;	3 - Normal
+				; 0-3	Movements of the ball to change the Y pos
+				;	F - Half diagonal
+				;	2 - Half diagonal
+				;	1 - Diagonal
 
 ; Sprite definitions (of sorts)
 BLANK:		EQU	$00	; 00000000
 LINE:		EQU	$80	; 00010000
-PADDLE:		EQU	$3C	; 00111100
+;PADDLE:		EQU	$3C	; 00111100
+PADDLE1:	EQU	$0F	; 00001111
+PADDLE2:	EQU	$F0	; 11110000
 FILL:		EQU	$FF	; 11111111
 
 ; Score digits 'sprites'
@@ -133,6 +149,7 @@ nineSprite:
 ; Paints a paddle
 ;
 ; Input: HL -> paddle position
+;	 C -> sprite of paddle
 ; Output: None
 ; B and HL changed on exit
 ;------------------------------------------------------------------------------
@@ -143,7 +160,7 @@ nineSprite:
 
 	LD	B, $16
 .loop:
-	LD	(HL), PADDLE
+	LD	(HL), C
 	CALL	NextScan
 	DJNZ	.loop
 
