@@ -477,7 +477,7 @@ checkVerticalLimit:
 ; Output:
 ; AF, BC, DE and HL changed on exit
 ;------------------------------------------------------------------------------
-@PrintScore:
+@PrintScores:
 	; Load player 1 score into A
 	LD	A, (p1Score)
 	; And get the sprite pair we need to print
@@ -498,7 +498,7 @@ checkVerticalLimit:
 	; Now we get the screen location to print P1 score into HL
 	LD	HL, POINTS_P1
 	; And we print the digit
-	CALL	.print
+	CALL	PrintScore
 
 	; Now for the second digit of P1 score
 	;
@@ -521,7 +521,7 @@ checkVerticalLimit:
 	INC	L
 
 	; And we print the digit
-	CALL	.print
+	CALL	PrintScore
 
 	; Player 2 score - this is basically a repeat of eveything above
 
@@ -540,7 +540,7 @@ checkVerticalLimit:
 	; Now we get the screen location to print P1 score into HL
 	LD	HL, POINTS_P2
 	; And we print the digit
-	CALL	.print
+	CALL	PrintScore
 
 	; Now for the second digit of P1 score
 	;
@@ -562,7 +562,7 @@ checkVerticalLimit:
 	; Unlike last time we increment to the next position
 	INC	L
 
-.print:
+@PrintScore:
 	; Each time we get here HL is the location to print the sprite and DE
 	; points to the sprite itself
 
@@ -590,127 +590,99 @@ checkVerticalLimit:
 	RET
 
 ;------------------------------------------------------------------------------
-; ReprintScore:
+; ReprintScores:
 ; Reprints the player scores, ensuring that they aren't erased by the ball
 ;
 ; Input:
 ; Output:
 ; AF, BC, DE and HL changed on exit
 ;------------------------------------------------------------------------------
-@ReprintScore:
-	; Load player 1 score into A
+@ReprintScores:
+	; Load ball position and test it's Y position for collision with score
+	LD	HL, (ballPos)
+	; Get the Y position
+	CALL	GetPtrY
+	; Is the ball within the score area vertically?
+	CP	POINTS_Y_B
+	; No? No need to reprint so return
+	RET	NC
+
+	; Load only the row and column of the balls position
+	LD	A, L
+	; And keep only the column (the're both 1 column wide)
+	AND	$1F
+.checkP1L
+	; Check the position of the ball against the left edge of P1 score
+	CP	POINTS_X1_L
+	; If there's a carry then we are to the left of it, don't repaint
+	RET	C
+	; If the columns equal (zero flag set) we need to reprint P1 score
+	JR	Z, .checkP1R
+.checkP2R:
+	; Since we didn't jump, continue checks, right edge of S2 next
+	CP	POINTS_X2_R
+	; Same deal, if we're in the score, we need to reprint it
+	JR	Z, .checkP2L
+	; If we have no carry, we are to the right and can again exit
+	RET	NC
+.checkP1R:
+	; Didn't jump so check right edge of score 1
+	CP	POINTS_X1_R
+	JR	C, .p1reprint
+	JR	NZ, .p2reprint
+
+.p1reprint:
+	; Get P1 score
 	LD	A, (p1Score)
-	; And get the sprite pair we need to print
+	; Get the score sprites
 	CALL	GetScoreSprite
-
-	; After a call to GetScoreSprite, HL contains the address of the first
-	; sprite and HL + 1 the address of the second. Z80 is little endian so
-	; the addresses are LS, MS. SO for example if the location of the sprite
-	; for ONE is $9060 then H = 60, L = 90
-
-	; Push the result onto the stack to preserve it for the second digit
+	; Store the address of the first sprite
 	PUSH	HL
-	; Load the Least siginificant bit into E
+	; Print the first digit
 	LD	E, (HL)
-	; Increment and add the most significant bit into D
 	INC	HL
 	LD	D, (HL)
-	; Now we get the screen location to print P1 score into HL
 	LD	HL, POINTS_P1
-	; And we print the digit
-	CALL	.print
-
-	; Now for the second digit of P1 score
-	;
-	; Retrieve our saved HL
+	CALL	PrintScore
+	; Print the second digit
 	POP	HL
-	; INC twice to get the address of digit 2 since it points to digit 1
 	INC	HL
 	INC	HL
-
-	; This is a bit of a repeat of above so can probably be optimised
-	;
-	; Load LSB into E
 	LD	E, (HL)
-	; Increment and add the most significant bit into D
 	INC	HL
 	LD	D, (HL)
-	; Now we get the screen location to print P1 score into HL
 	LD	HL, POINTS_P1
-	; Unlike last time we increment to the next position
 	INC	L
+	JR	PrintScore
 
-	; And we print the digit
-	CALL	.print
+.checkP2L:
+	; Compoare A to left edge of P2 score and if there's a carry we're
+	; in the gap between the two scores so we don't need to reprint
+	CP	POINTS_X2_L
+	RET	C
 
-	; Player 2 score - this is basically a repeat of eveything above
-
-	; Load player 2 score into A
+.p2reprint:
+	; Get P2 score
 	LD	A, (p2Score)
-	; And get the sprite pair we need to print
+	; Get the score sprites
 	CALL	GetScoreSprite
-
-	; Push the result onto the stack to preserve it for the second digit
+	; Store the address of the first sprite
 	PUSH	HL
-	; Load the Least siginificant bit into E
+	; Print the first digit
 	LD	E, (HL)
-	; Increment and add the most significant bit into D
 	INC	HL
 	LD	D, (HL)
-	; Now we get the screen location to print P1 score into HL
 	LD	HL, POINTS_P2
-	; And we print the digit
-	CALL	.print
-
-	; Now for the second digit of P1 score
-	;
-	; Retrieve our saved HL
+	CALL	PrintScore
+	; Print the second digit
 	POP	HL
-	; INC twice to get the address of digit 2 since it points to digit 1
 	INC	HL
 	INC	HL
-
-	; This is a bit of a repeat of above so can probably be optimised
-	;
-	; Load LSB into E
 	LD	E, (HL)
-	; Increment and add the most significant bit into D
 	INC	HL
 	LD	D, (HL)
-	; Now we get the screen location to print P1 score into HL
 	LD	HL, POINTS_P2
-	; Unlike last time we increment to the next position
 	INC	L
-
-.print:
-	; Each time we get here HL is the location to print the sprite and DE
-	; points to the sprite itself
-
-	; Each digit is 16 scan lines
-	LD	B, $10
-	; Save the sprite address and the print address
-	PUSH	DE
-	PUSH	HL
-.loop:
-	; Load the byte we need to paint
-	LD	A, (DE)
-	; Important! Mix with what's already on screen so it doesn't get
-	; overridden and erased by the ball
-	OR	(HL)
-	; And copy it to the required screen location
-	LD	(HL), A
-	; Move to the next byte
-	INC	DE
-	; Get the next scanline into HL
-	CALL	NextScan
-	; Repeat for all 16 lines (B = 0)
-	DJNZ	.loop
-
-	; Restore our saved values in reverse order (important!)
-	POP	HL
-	POP	DE
-	; And return. For either internally or completely out when we're done
-	RET
-
+	JR	PrintScore
 
 	ENDMODULE

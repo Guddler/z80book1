@@ -201,8 +201,8 @@ pTime:	DB	$00
 	LD	A, (ballSetting)
 	; Mask / keep just X direction, bit 6
 	AND	$40
-	; And we set 00110001 - Y dir up (0), speed 3, diagonal tilt
-	OR	$31
+	; And we set 00 101 001 - Y dir up (0), speed 5, diagonal tilt
+	OR	$29
 	; We're done
 	JR	.end
 .zone2:
@@ -218,7 +218,7 @@ pTime:	DB	$00
 	LD	A, (ballSetting)
 	; Mask / keep just X direction, bit 6
 	AND	$40
-	; And we set 00100010 - Y dir up (0), speed 2, semi-diagonal tilt
+	; And we set 00 100 010 - Y dir up (0), speed 4, semi-diagonal tilt
 	OR	$22
 	; We're done
 	JR	.end
@@ -235,7 +235,7 @@ pTime:	DB	$00
 	LD	A, (ballSetting)
 	; Mask / keep X & Y direction, bits 7 & 6
 	AND	$C0
-	; And we set 00011111 - speed 1, semi-flat tilt
+	; And we set 00 011 111 - speed 3, semi-flat tilt
 	OR	$1F
 	; We're done
 	JR	.end
@@ -252,8 +252,8 @@ pTime:	DB	$00
 	LD	A, (ballSetting)
 	; Mask / keep just Y direction, bit 6
 	AND	$40
-	; And we set 10100010 - Y down, speed 2, semi-diagonal tilt
-	OR	$A2
+	; And we set 10 100 010 - Y down, speed 4, semi-diagonal tilt
+	OR	$92
 	; We're done
 	JR	.end
 .zone5:
@@ -262,8 +262,8 @@ pTime:	DB	$00
 	LD	A, (ballSetting)
 	; Mask / keep just Y direction, bit 6
 	AND	$40
-	; And we set 10110001 - Y down, speed 3, diagonal tilt
-	OR	$B1
+	; And we set 10 101 001 - Y down, speed 5, diagonal tilt
+	OR	$99
 	; We're done
 	JR	.end
 .end:
@@ -364,13 +364,12 @@ pTime:	DB	$00
 	;
 	; We now get our ball speed (and thus the loop limit from ball setting)
 	LD	A, (ballSetting)
-	; We rotate bits 5 & 4 to bits 0 & 1
+	; We rotate bits 5-3 to bits 2-0
 	RRCA
 	RRCA
 	RRCA
-	RRCA
-	; Keep just the 2 bits we want
-	AND	$03
+	; Keep just the 3 bits we want
+	AND	$07
 	; And store in B
 	LD	B, A
 
@@ -498,7 +497,7 @@ pTime:	DB	$00
 	; Add one (NB: INC the value at the address pointed to by HL, not HL)
 	INC	(HL)
 	; And print the new score, clear the ball and set the new direction
-	CALL	PrintScore
+	CALL	PrintScores
 	CALL	ClearBall
 	CALL	SetBallLeft
 
@@ -545,7 +544,7 @@ pTime:	DB	$00
 	; Add one (NB: INC the value at the address pointed to by HL, not HL)
 	INC	(HL)
 	; And print the new score
-	CALL	PrintScore
+	CALL	PrintScores
 	CALL	ClearBall
 	CALL	SetBallRight
 
@@ -556,7 +555,7 @@ pTime:	DB	$00
 	; Load current ball setting
 	LD	A, (ballSetting)
 	; Keep just the tilt portion
-	AND	$0F
+	AND	$07
 	; Store in D
 	LD	D, A
 
@@ -593,8 +592,8 @@ pTime:	DB	$00
 	LD	A, (ballSetting)
 	; Keep the Y direction
 	AND	$80
-	; Set X to Right, speed to 3 and diagonal tilt
-	OR	$31
+	; Set X to Right, speed to 4 and diagonal tilt  00 10 1 001
+	OR	$29
 	; Save setting
 	LD	(ballSetting), A
 	; Also zero the ball move counter
@@ -613,7 +612,7 @@ pTime:	DB	$00
 ;------------------------------------------------------------------------------
 @SetBallRight:
 	; Force the ball position to the right
-	LD	HL, $4D7C
+	LD	HL, $4D7E
 	LD	(ballPos), HL
 	; We set the ball offset to the first right offset
 	LD	A, $FF
@@ -622,8 +621,8 @@ pTime:	DB	$00
 	LD	A, (ballSetting)
 	; Keep Y direction
 	AND	$80
-	; Set X to left, speed to 3 and diagonal tilt (0 1 11 0001)
-	OR	$71
+	; Set X to left, speed to 5 and diagonal tilt (01 101 001)
+	OR	$69
 	; Save ball settings
 	LD	(ballSetting), A
 	; Also zero ball move coutner

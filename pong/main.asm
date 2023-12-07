@@ -22,7 +22,7 @@ codeStart:
 	CALL	Cls
 	CALL	PrintLine
 	CALL	PrintBorder
-	CALL	PrintScore
+	CALL	PrintScores
 
 	; Before main loop, wait for the someone to press 5 to start
 	CALL	WaitStart
@@ -34,7 +34,7 @@ codeStart:
 	LD	(p1Score), A
 	LD	(p2Score), A
 	; Print new score
-	CALL	PrintScore
+	CALL	PrintScores
 
 	; Reset ball speed
 	;
@@ -69,7 +69,7 @@ Loop:
 	; Print ball and loop
 	CALL 	PrintBall
 	CALL	ReprintLine
-	CALL	ReprintScore
+	CALL	ReprintScores
 
 	; Draw paddles
 	LD 	HL, (paddle1pos)

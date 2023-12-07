@@ -18,6 +18,15 @@ CROSS_RIGHT_ROT	EQU	$01	; collides with the paddle
 POINTS_P1:	EQU	$450D	; 010T TSSS RRRC CCCC
 POINTS_P2:	EQU	$4511	; 010T TSSS RRRC CCCC
 
+				; These all define the edges of the score areas
+				; we use them so allow us to only reprint the
+				; score when the ball passes over it instead of
+				; blindly doing it every time. Optimisation yay!
+POINTS_X1_L:	EQU	$0C	; P1 Score, left edge	- TTRRRSSS
+POINTS_X1_R:	EQU	$0F	; P1 Score, right edge 	- TTRRRSSS
+POINTS_X2_L:	EQU	$10	; P2 Score, left edge	- TTRRRSSS
+POINTS_X2_R:	EQU	$13	; P2 Score, right edge	- TTRRRSSS
+POINTS_Y_B:	EQU	$14	; Score, bottom edge	- TTRRRSSS
 
 ; VARS
 paddle1pos:	DW	$4861	; 010T TSSS RRRC CCCC
@@ -28,12 +37,12 @@ ballMoveCount:	DB	$00	; Number of frames ball must take to change dir
 ballSetting:	DB	$31	; Ball speed and direction:
 				; 7	Y Dir (0 up, 1 down)
 				; 6	X Dir (0 right, 1 left)
-				; 5-4	Ball Speed
-				;	1 - Stupid fast
-				;	2 - Fast
-				;	3 - Normal
-				; 0-3	Movements of the ball to change the Y pos
-				;	F - Semi flat
+				; 5-3	Ball Speed
+				;	2 - Stupid fast
+				;	3 - Fast
+				;	4 - Normal
+				; 0-2	Movements of the ball to change the Y pos
+				;	7 - Semi flat
 				;	2 - Semi diagonal
 				;	1 - Diagonal
 
