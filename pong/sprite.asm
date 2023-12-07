@@ -33,8 +33,8 @@ ballSetting:	DB	$31	; Ball speed and direction:
 				;	2 - Fast
 				;	3 - Normal
 				; 0-3	Movements of the ball to change the Y pos
-				;	F - Half diagonal
-				;	2 - Half diagonal
+				;	F - Semi flat
+				;	2 - Semi diagonal
 				;	1 - Diagonal
 
 ; Sprite definitions (of sorts)
@@ -146,14 +146,42 @@ nineSprite:
 
 ;------------------------------------------------------------------------------
 ; PrintPaddle
-; Paints a paddle
+; Paints a paddle. Paddle is 22 scanlines high with a blank line above and
+; below for a total of 24 scan lines or 3 rows.
+;
+; This is more relevant to collision detection, but the paddle is divided into
+; 5 vertical zones. Where the ball hits determines the speed of the ball and
+; also the
+;	-	-
+;	-	1	---
+;	-	1	|	Speed
+;	-	1	|	Slow
+;	-	1	---
+;	-	2	---
+;	-	2	|
+;	-	2	|	Speed
+;	-	2	|	Normal
+;	-	2	---
+;	-	3	---
+;	-	3	|	Speed
+;	-	3	|	Fast
+;	-	3	---
+;	-	4	---
+;	-	4	|
+;	-	4	|	Speed
+;	-	4	|	Normal
+;	-	4	---
+;	-	5	---
+;	-	5	|	Speed
+;	-	5	|	Slow
+;	-	5	---
+;	-	-
 ;
 ; Input: HL -> paddle position
 ;	 C -> sprite of paddle
 ; Output: None
 ; B and HL changed on exit
 ;------------------------------------------------------------------------------
-
 @PrintPaddle:
 	LD	(HL), BLANK
 	CALL	NextScan

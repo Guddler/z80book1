@@ -71,7 +71,7 @@ pTime:	DB	$00
 	; And store
 	LD	(ballSetting), A
 	; Set the ball offset to $FF
-	LD	A, $FF
+	LD	A, CROSS_LEFT_ROT
 	LD	(ballRotation), A
 
 	; And we're done
@@ -101,7 +101,7 @@ pTime:	DB	$00
 	; And store the result
 	LD	(ballSetting), A
 	; Set the ball offset to $01
-	LD	A, $01
+	LD	A, CROSS_RIGHT_ROT
 	LD	(ballRotation), A
 
 	; And again, we're done
@@ -125,12 +125,13 @@ pTime:	DB	$00
 
 ;------------------------------------------------------------------------------
 ; CheckCrossY
-; Check for a collision on the Y axis
+; Check for a collision on the Y axis and adjust the ball speed and direction
+; accordingly
 ;
 ; Input: HL -> Position of paddle (used by GetPtrY call)
 ; 	 C -> Collision column (CROSS_LEFT or CROSS_RIGHT)
 ; Output: Z -> Collision, NZ -> No collision
-; AF changed on exit
+; AF, BC and HL changed on exit
 ;------------------------------------------------------------------------------
 @CheckCrossY:
 	CALL	GetPtrY
@@ -166,8 +167,112 @@ pTime:	DB	$00
 	; No carry means the ball passed through the first scanline which is OK
 	; (NZ = COllision False)
 	RET	NC
+
+	; From here we know there was a collision with the paddle so we now
+	; proceed to determine which zone it hit and set the ball properties
+	; accordingly
+
+	; We currently have the last non-blank line of the paddle in C, grab it
+	LD	A, C
+	; Get back to the top of the paddle
+	SUB	$15
+	; And sore back in C
+	LD	C, A
+	; B contains the position of the ball
+	LD	A, B
+	; Position to the bottom of the ball
+	ADD	A, $04
+	; Store back in B
+	LD	B, A
+
+	; We're now ready to work our way down the paddle determining where the
+	; ball hit (since we've already established that it did). See PrintPaddle
+	; in sprite.asm for a description of the 5 zones.
+.zone1:
+	; Get the top of the paddle
+	LD	A, C
+	; First zone is 4 lines, so add 4
+	ADD	A, $04
+	; Compare to the position of the ball
+	CP	B
+	; If there was a carry then the ball hit lower than this zone, continue
+	JR	C, .zone2
+	; Otherwise set ball confiig and jump to the end
+	LD	A, (ballSetting)
+	; Mask / keep just X direction, bit 6
+	AND	$40
+	; And we set 00110001 - Y dir up (0), speed 3, diagonal tilt
+	OR	$31
+	; We're done
+	JR	.end
+.zone2:
+	; Get the top of the paddle again
+	LD	A, C
+	; Zone 2 is lines 5-9, so add 9
+	ADD	A, $09
+	; Compare to the position of the ball
+	CP	B
+	; If there was a carry then the ball hit lower than this zone, continue
+	JR	C, .zone3
+	; Otherwise set ball confiig and jump to the end
+	LD	A, (ballSetting)
+	; Mask / keep just X direction, bit 6
+	AND	$40
+	; And we set 00100010 - Y dir up (0), speed 2, semi-diagonal tilt
+	OR	$22
+	; We're done
+	JR	.end
+.zone3:
+	; Get the top of the paddle again
+	LD	A, C
+	; Zone 3 is lines 10-13, so add 13
+	ADD	A, $0D
+	; Compare to the position of the ball
+	CP	B
+	; If there was a carry then the ball hit lower than this zone, continue
+	JR	C, .zone4
+	; Otherwise set ball confiig and jump to the end
+	LD	A, (ballSetting)
+	; Mask / keep X & Y direction, bits 7 & 6
+	AND	$C0
+	; And we set 00011111 - speed 1, semi-flat tilt
+	OR	$1F
+	; We're done
+	JR	.end
+.zone4:
+	; Get the top of the paddle again
+	LD	A, C
+	; Zone 4 is lines 14-18, so add 18
+	ADD	A, $12	; Book has this set to $11 but I disagree - we'll see.
+	; Compare to the position of the ball
+	CP	B
+	; If there was a carry then the ball hit lower than this zone, continue
+	JR	C, .zone5
+	; Otherwise set ball confiig and jump to the end
+	LD	A, (ballSetting)
+	; Mask / keep just Y direction, bit 6
+	AND	$40
+	; And we set 10100010 - Y down, speed 2, semi-diagonal tilt
+	OR	$A2
+	; We're done
+	JR	.end
+.zone5:
+	; We don't need any further checks since we didn't collide with any of
+	; the other zones, but we know it collided, so set the ball and end
+	LD	A, (ballSetting)
+	; Mask / keep just Y direction, bit 6
+	AND	$40
+	; And we set 10110001 - Y down, speed 3, diagonal tilt
+	OR	$B1
+	; We're done
+	JR	.end
+.end:
+	; Save the ball setting that was worked out over the zone checks
+	LD	(ballSetting), A
 	; Clear A, thus setting Z (Z = Collision True)
 	XOR	A
+	; Reset the ball movement counter to 0
+	LD	(ballMoveCount), A
 	; Return
 	RET
 
@@ -193,7 +298,7 @@ pTime:	DB	$00
 	; Save the loop count
 	LD	(countLoopPaddles), A
 	; If we've not reached our delay limit carry on waiting
-	CP	$04
+	CP	$02
 	JR	NZ, .end
 
 	; Finished waiting? Reset delay and proceed to move ball
@@ -298,6 +403,10 @@ pTime:	DB	$00
 	CALL	CheckTop
 	; If we have, we need to change direction
 	JR	Z, .upChg
+	; Check if we are due to move the ball yet
+	CALL	MoveBallY
+	; And skip moving the ball if we are not ready to yet
+	JR	NZ, .x
 	; Otherwise get the scanline at Y - 1
 	CALL	PreviousScan
 	; Store the new ball position
@@ -325,6 +434,8 @@ pTime:	DB	$00
 	LD	A, BALL_BOTTOM
 	CALL	CheckBottom
 	JR	Z, .downChg
+	CALL	MoveBallY
+	JR	NZ, .x
 	CALL	NextScan
 	LD	(ballPos), HL
 	JR	.x
@@ -441,6 +552,27 @@ pTime:	DB	$00
 .end:
 	RET
 
+@MoveBallY:
+	; Load current ball setting
+	LD	A, (ballSetting)
+	; Keep just the tilt portion
+	AND	$0F
+	; Store in D
+	LD	D, A
+
+	; Increment the ball move coutner
+	LD	A, (ballMoveCount)
+	INC	A
+	LD	(ballMoveCount), A
+	; Compare to the tilt value
+	CP	D
+	; Do nothing and return if we haven't reached the tilt yet
+	RET	NZ
+
+	; Zero out the ball move count
+	XOR	A
+	LD	(ballMoveCount), A
+	RET
 
 ;------------------------------------------------------------------------------
 ; SetBallLeft
@@ -459,8 +591,15 @@ pTime:	DB	$00
 	LD	(ballRotation), A
 	; We get the ball setting and set the direction to right
 	LD	A, (ballSetting)
-	AND	$BF
+	; Keep the Y direction
+	AND	$80
+	; Set X to Right, speed to 3 and diagonal tilt
+	OR	$31
+	; Save setting
 	LD	(ballSetting), A
+	; Also zero the ball move counter
+	XOR	A
+	LD	(ballMoveCount), A
 
 	RET
 
@@ -481,8 +620,15 @@ pTime:	DB	$00
 	LD	(ballRotation), A
 	; We get the ball setting and set the direction to left
 	LD	A, (ballSetting)
-	OR	$40
+	; Keep Y direction
+	AND	$80
+	; Set X to left, speed to 3 and diagonal tilt (0 1 11 0001)
+	OR	$71
+	; Save ball settings
 	LD	(ballSetting), A
+	; Also zero ball move coutner
+	XOR	A
+	LD	(ballMoveCount), A
 
 	RET
 	ENDMODULE

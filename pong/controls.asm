@@ -13,65 +13,6 @@
 	MODULE input
 
 @ScanKeys:
-	; Set key input range for keys 1-5
-	LD	A, $F7
-	; And read the keyboard port
-	IN	A, ($FE)
-	; Has key 1 been pressed?
-	BIT	$00, A
-	; No? skip to check key 2
-	JR	NZ, .key_2
-
-.key_1:
-	; Load current ball setting
-	LD	A, (ballSetting)
-	; And clear bits 5 & 4 (ball speed)
-	AND	$CF
-	; Set bits 5 & 6 to 01
-	OR	$10
-	; And save the setting
-	LD	(ballSetting), A
-	; Jump forward to reset the speed
-	JR	.speed
-
-.key_2:
-	; Has key 1 been pressed?
-	BIT	$01, A
-	; No? skip to check key 3
-	JR	NZ, .key_3
-	; Load current ball setting
-	LD	A, (ballSetting)
-	; And clear bits 5 & 4 (ball speed)
-	AND	$CF
-	; Set bits 5 & 6 to 01
-	OR	$20
-	; And save the setting
-	LD	(ballSetting), A
-	; Jump forward to reset the speed
-	JR	.speed
-
-.key_3:
-	; Has key 1 been pressed?
-	BIT	$02, A
-	; No? skip to check key 3
-	JR	NZ, .ctrl
-	; Load current ball setting
-	LD	A, (ballSetting)
-	; And clear bits 5 & 4 (ball speed)
-	AND	$CF
-	; Set bits 5 & 6 to 01
-	OR	$30
-	; And save the setting
-	LD	(ballSetting), A
-	; Jump forward to reset the speed
-	JR	.speed
-.speed:
-	; If one of the speed keys has been pressed reset loop counter so we
-	; don't wait 254 frames for the ball to move again
-	XOR	A
-	LD	(countLoopBall), A
-
-.ctrl:
 	; Ensure D is cleared
 	LD	D, $00
 
