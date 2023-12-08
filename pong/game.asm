@@ -164,8 +164,10 @@ pTime:	DB	$00
 	INC	A
 	; And repeat the same check as before
 	SUB	C
-	; No carry means the ball passed through the first scanline which is OK
-	; (NZ = COllision False)
+	; 0? collision with frist scanline (actually last I think)
+	JR	Z, .zone5
+	; No carry means the ball passed underneath or collides with the first
+	; scanline which is OK. If it was the first scaline we activate Z
 	RET	NC
 
 	; From here we know there was a collision with the paddle so we now
