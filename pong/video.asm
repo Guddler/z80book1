@@ -250,12 +250,14 @@ checkVerticalLimit:
 
 	; Set attribute memory
 	;
-	; Same as above, load HL with start of attribute ram
-	LD	HL, $5800	;     BG  FG
+	; Following the above HL will contain $57FF and we need one more. We
+	; could use LD HL, $5800 but that consumes 3 bytes and takes 10 cycles.
+	; If we just INC HL instead it comes down to 2 bytes and 6 cycles.
+	INC	HL
 	; Set attributes for that byte
 	LD 	(HL), $07	; 0 0 000 111
 	; Set DE to the next address for use by LDIR
-	LD	DE, $5801
+	INC	DE		; As above use INC instead of LD
 	; Set BC to the number of addresses to clear ((24 * 32) - 1 = $2FF)
 	LD	BC, $2FF
 	; Loop until they're all set
