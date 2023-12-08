@@ -38,10 +38,10 @@ BEEPER:		EQU	$03B5
 	PUSH	DE
 	PUSH	HL
 	; Is the sound to be played the score sound?
-	CP	1
+	DEC	A
 	JR	Z, .score
 	; Is it the paddle?
-	CP	2
+	DEC	A
 	JR	Z, .paddle
 	; No? must be the border
 .border:
