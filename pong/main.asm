@@ -20,7 +20,7 @@
 ; cause huge slowdown while they play. Maybe we can do something about this, or
 ; maybe it doesn't do it on real hardware? Need to check.
 
-	ORG	$8000
+	ORG	$5DAD
 
 ; start is used by the compiler to create the SNA so has to be first
 codeStart:
