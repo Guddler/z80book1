@@ -298,7 +298,7 @@ pTime:	DB	$00
 	; Save the loop count
 	LD	(countLoopPaddles), A
 	; If we've not reached our delay limit carry on waiting
-	CP	$02
+	CP	$03
 	JR	NZ, .end
 
 	; Finished waiting? Reset delay and proceed to move ball

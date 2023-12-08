@@ -19,14 +19,14 @@
 .key_A:
 	LD	A, $FD
 	IN	A, ($FE)
-	BIT 	$00, A
+	AND 	$01
 	JR	NZ, .key_Z
 	SET	$00, D
 
 .key_Z:
 	LD	A, $FE
 	IN	A, ($FE)
-	BIT 	$01, A
+	AND 	$02
 	JR	NZ, .key_0
 	SET	$01, D
 
