@@ -492,13 +492,13 @@ checkVerticalLimit:
 	; the addresses are LS, MS. SO for example if the location of the sprite
 	; for ONE is $9060 then H = 60, L = 90
 
-	; Push the result onto the stack to preserve it for the second digit
-	PUSH	HL
 	; Load the Least siginificant bit into E
 	LD	E, (HL)
 	; Increment and add the most significant bit into D
 	INC	HL
 	LD	D, (HL)
+	; Push the result onto the stack to preserve it for the second digit
+	PUSH	HL
 	; Now we get the screen location to print P1 score into HL
 	LD	HL, POINTS_P1
 	; And we print the digit
@@ -508,8 +508,8 @@ checkVerticalLimit:
 	;
 	; Retrieve our saved HL
 	POP	HL
-	; INC twice to get the address of digit 2 since it points to digit 1
-	INC	HL
+	; INC to get the address of digit 2 since it points to digit 1
+	; (we already did one of the INCs before pushing HL to the stack)
 	INC	HL
 
 	; This is a bit of a repeat of above so can probably be optimised
@@ -520,13 +520,13 @@ checkVerticalLimit:
 	INC	HL
 	LD	D, (HL)
 	; Now we get the screen location to print P1 score into HL
-	LD	HL, POINTS_P1
 	; Unlike last time we increment to the next position
-	INC	L
+	LD	HL, POINTS_P1 + 1
 
 	; And we print the digit
 	CALL	PrintScore
 
+p2print:
 	; Player 2 score - this is basically a repeat of eveything above
 
 	; Load player 2 score into A
@@ -534,13 +534,13 @@ checkVerticalLimit:
 	; And get the sprite pair we need to print
 	CALL	GetScoreSprite
 
-	; Push the result onto the stack to preserve it for the second digit
-	PUSH	HL
 	; Load the Least siginificant bit into E
 	LD	E, (HL)
 	; Increment and add the most significant bit into D
 	INC	HL
 	LD	D, (HL)
+	; Push the result onto the stack to preserve it for the second digit
+	PUSH	HL
 	; Now we get the screen location to print P1 score into HL
 	LD	HL, POINTS_P2
 	; And we print the digit
@@ -550,8 +550,7 @@ checkVerticalLimit:
 	;
 	; Retrieve our saved HL
 	POP	HL
-	; INC twice to get the address of digit 2 since it points to digit 1
-	INC	HL
+	; INC to get the address of digit 2 since it points to digit 1
 	INC	HL
 
 	; This is a bit of a repeat of above so can probably be optimised
@@ -562,9 +561,8 @@ checkVerticalLimit:
 	INC	HL
 	LD	D, (HL)
 	; Now we get the screen location to print P1 score into HL
-	LD	HL, POINTS_P2
 	; Unlike last time we increment to the next position
-	INC	L
+	LD	HL, POINTS_P2 + 1
 
 @PrintScore:
 	; Each time we get here HL is the location to print the sprite and DE
@@ -633,30 +631,28 @@ checkVerticalLimit:
 	; Didn't jump so check right edge of score 1
 	CP	POINTS_X1_R
 	JR	C, .p1reprint
-	JR	NZ, .p2reprint
+	JR	NZ, p2print
 
 .p1reprint:
 	; Get P1 score
 	LD	A, (p1Score)
 	; Get the score sprites
 	CALL	GetScoreSprite
-	; Store the address of the first sprite
-	PUSH	HL
 	; Print the first digit
 	LD	E, (HL)
 	INC	HL
 	LD	D, (HL)
+	; Store the address of the first sprite
+	PUSH	HL
 	LD	HL, POINTS_P1
 	CALL	PrintScore
 	; Print the second digit
 	POP	HL
 	INC	HL
-	INC	HL
 	LD	E, (HL)
 	INC	HL
 	LD	D, (HL)
-	LD	HL, POINTS_P1
-	INC	L
+	LD	HL, POINTS_P1 + 1
 	JR	PrintScore
 
 .checkP2L:
@@ -664,29 +660,28 @@ checkVerticalLimit:
 	; in the gap between the two scores so we don't need to reprint
 	CP	POINTS_X2_L
 	RET	C
+	JR	p2print
 
-.p2reprint:
-	; Get P2 score
-	LD	A, (p2Score)
-	; Get the score sprites
-	CALL	GetScoreSprite
-	; Store the address of the first sprite
-	PUSH	HL
-	; Print the first digit
-	LD	E, (HL)
-	INC	HL
-	LD	D, (HL)
-	LD	HL, POINTS_P2
-	CALL	PrintScore
-	; Print the second digit
-	POP	HL
-	INC	HL
-	INC	HL
-	LD	E, (HL)
-	INC	HL
-	LD	D, (HL)
-	LD	HL, POINTS_P2
-	INC	L
-	JR	PrintScore
+; .p2reprint:
+; 	; Get P2 score
+; 	LD	A, (p2Score)
+; 	; Get the score sprites
+; 	CALL	GetScoreSprite
+; 	; Print the first digit
+; 	LD	E, (HL)
+; 	INC	HL
+; 	LD	D, (HL)
+; 	; Store the address of the first sprite
+; 	PUSH	HL
+; 	LD	HL, POINTS_P2
+; 	CALL	PrintScore
+; 	; Print the second digit
+; 	POP	HL
+; 	INC	HL
+; 	LD	E, (HL)
+; 	INC	HL
+; 	LD	D, (HL)
+; 	LD	HL, POINTS_P2 + 1
+; 	JR	PrintScore
 
 	ENDMODULE
