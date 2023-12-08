@@ -380,7 +380,7 @@ pTime:	DB	$00
 	LD	(countLoopBall), A
 	; If we've not reached our delay limit carry on waiting
 	CP	B
-	JP	NZ, .end
+	RET	NZ
 
 	; Finished waiting? Reset delay and proceed to move ball
 	LD	A, $00
@@ -468,7 +468,7 @@ pTime:	DB	$00
 	; If not, increment, store and jumpt to the end
 	INC	A
 	LD	(ballRotation), A
-	JR	.end
+	RET
 
 	; If we were on the last offset but not the right border, we move to the
 	; next column, otherwise we need to change direction
@@ -489,7 +489,7 @@ pTime:	DB	$00
 	LD	A, $01			; FIXME: Shouldn't this be 0 ?
 	LD	(ballRotation), A
 	; We're done
-	JR	.end
+	RET
 
 .rightChg:
 	; Load p1 score
@@ -502,7 +502,7 @@ pTime:	DB	$00
 	CALL	SetBallLeft
 
 	; And we're done
-	JR	.end
+	RET
 
 .left:
 	; Load offset
@@ -516,7 +516,7 @@ pTime:	DB	$00
 	; Store it
 	LD	(ballRotation), A
 	; And we're done
-	JR	.end
+	RET
 
 .leftLast:
 	; Load ball position
@@ -536,7 +536,7 @@ pTime:	DB	$00
 	; Store it
 	LD	(ballRotation), A
 	; And we're done
-	JR	.end
+	RET
 
 .leftChg:
 	; Load p2 score
@@ -547,8 +547,6 @@ pTime:	DB	$00
 	CALL	PrintScores
 	CALL	ClearBall
 	CALL	SetBallRight
-
-.end:
 	RET
 
 @MoveBallY:
