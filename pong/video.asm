@@ -490,6 +490,12 @@ checkVerticalLimit:
 ; AF, BC, DE and HL changed on exit
 ;------------------------------------------------------------------------------
 @PrintScores:
+	; Prints P1 score
+	CALL	p1print
+	; Prints P2 score
+	JR	p2print
+
+p1print:
 	; Load player 1 score into A
 	LD	A, (p1Score)
 	; And get the sprite pair we need to print
@@ -533,6 +539,7 @@ checkVerticalLimit:
 
 	; And we print the digit
 	CALL	PrintScore
+	RET
 
 p2print:
 	; Player 2 score - this is basically a repeat of eveything above
@@ -579,8 +586,6 @@ p2print:
 	; Each digit is 16 scan lines
 	LD	B, $10
 	; Save the sprite address and the print address
-	PUSH	DE
-	PUSH	HL
 .loop:
 	; Load the byte we need to paint
 	LD	A, (DE)
@@ -594,8 +599,6 @@ p2print:
 	DJNZ	.loop
 
 	; Restore our saved values in reverse order (important!)
-	POP	HL
-	POP	DE
 	; And return. For either internally or completely out when we're done
 	RET
 
@@ -627,69 +630,28 @@ p2print:
 	; If there's a carry then we are to the left of it, don't repaint
 	RET	C
 	; If the columns equal (zero flag set) we need to reprint P1 score
-	JR	Z, .checkP1R
+	JR	Z, p1print
 .checkP2R:
 	; Since we didn't jump, continue checks, right edge of S2 next
 	CP	POINTS_X2_R
 	; Same deal, if we're in the score, we need to reprint it
-	JR	Z, .checkP2L
+	JR	Z, p2print
 	; If we have no carry, we are to the right and can again exit
 	RET	NC
 .checkP1R:
 	; Didn't jump so check right edge of score 1
 	CP	POINTS_X1_R
-	JR	C, .p1reprint
+	JR	Z, p1print
+	JR	C, p1print
+.checkP2L:
+	CP	POINTS_X2_L
+	RET	C
 	JR	NZ, p2print
 
-.p1reprint:
-	; Get P1 score
-	LD	A, (p1Score)
-	; Get the score sprites
-	CALL	GetScoreSprite
-	; Print the first digit
-	LD	E, (HL)
-	INC	HL
-	LD	D, (HL)
-	; Store the address of the first sprite
-	PUSH	HL
-	LD	HL, POINTS_P1
-	CALL	PrintScore
-	; Print the second digit
-	POP	HL
-	INC	HL
-	LD	E, (HL)
-	INC	HL
-	LD	D, (HL)
-	LD	HL, POINTS_P1 + 1
-	JR	PrintScore
-
-.checkP2L:
 	; Compoare A to left edge of P2 score and if there's a carry we're
 	; in the gap between the two scores so we don't need to reprint
 	CP	POINTS_X2_L
 	RET	C
 	JR	p2print
-
-; .p2reprint:
-; 	; Get P2 score
-; 	LD	A, (p2Score)
-; 	; Get the score sprites
-; 	CALL	GetScoreSprite
-; 	; Print the first digit
-; 	LD	E, (HL)
-; 	INC	HL
-; 	LD	D, (HL)
-; 	; Store the address of the first sprite
-; 	PUSH	HL
-; 	LD	HL, POINTS_P2
-; 	CALL	PrintScore
-; 	; Print the second digit
-; 	POP	HL
-; 	INC	HL
-; 	LD	E, (HL)
-; 	INC	HL
-; 	LD	D, (HL)
-; 	LD	HL, POINTS_P2 + 1
-; 	JR	PrintScore
 
 	ENDMODULE
