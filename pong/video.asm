@@ -325,19 +325,19 @@ checkVerticalLimit:
 ; AF and HL changed on exit
 ;------------------------------------------------------------------------------
 @GetScoreSprite:
-	; This optimises for a max score of 63 (63 * 4 = 252 = 1byte)
+	; To optimise for a max score of 99 we use the 16bit register HL
 	;
-	; Load the address of the Zero sprite into HL
-	LD	HL, Zero
+	; Store points in HL by putting 0 in the high byte and A in the low
+	LD	H, $0
+	LD	L, A
+
 	; Each score sprite is 4 bytes from the previous one so we multiply
 	; the score by 4 to get the offset to the sprite we want
-	ADD	A, A	; A + A = A * 2
-	ADD	A, A	; Do it again and it becomes the original A * 4
+	ADD	HL, HL	; HL + HL = HL * 2
+	ADD	HL, HL	; Do it again and it becomes the original HL * 4
 
-	; We will use a 16bit add so we must load both B and C
-	LD	B, $0
-	LD	C, A
-
+	; Load the address of sprite Zero into BC
+	LD	BC, Zero
 	; Now we just add BC to HL to get the position of the sprite
 	ADD	HL, BC
 	RET
