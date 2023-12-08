@@ -314,26 +314,33 @@ checkVerticalLimit:
 
 ;------------------------------------------------------------------------------
 ; GetScoreSprite
-; Gets the memory location of the sprite for the given score
+; Gets the memory location of the sprite for the given score. We have modified
+; this so that it takes the same amount of time regardless of the score by not
+; using a loop. Bear in mind that although the score can be up to 99, we haven't
+; defined any more score sprites than 16 so after that it will start to print
+; rubbish. That just needs the extra sprite references to be added.
 ;
 ; Input: A -> Score
 ; Output: HL -> Address of sprite to draw
 ; AF and HL changed on exit
 ;------------------------------------------------------------------------------
 @GetScoreSprite:
+	; This optimises for a max score of 63 (63 * 4 = 252 = 1byte)
+	;
 	; Load the address of the Zero sprite into HL
 	LD	HL, Zero
-	; Each score sprite is 4 bytes apart
-	LD	BC, $04
-	; Inc A just so our loop can start with a DEC
-	INC	A
-.loop:
-	; So we loop over the score and every time we decrement it we add 4 (BC)
-	; to the address in HL. We end up with a pointer to the correct sprite
-	DEC	A
-	RET	Z
+	; Each score sprite is 4 bytes from the previous one so we multiply
+	; the score by 4 to get the offset to the sprite we want
+	ADD	A, A	; A + A = A * 2
+	ADD	A, A	; Do it again and it becomes the original A * 4
+
+	; We will use a 16bit add so we must load both B and C
+	LD	B, $0
+	LD	C, A
+
+	; Now we just add BC to HL to get the position of the sprite
 	ADD	HL, BC
-	JR	.loop
+	RET
 
 ;------------------------------------------------------------------------------
 ; NextScan
