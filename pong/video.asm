@@ -136,9 +136,9 @@ checkVerticalLimit:
 @ReprintLine:
 	; Load ball position
 	LD	HL, (ballPos)
-	; Load just the line and column
+	; Load just the row and column
 	LD	A, L
-	; Mask to keep just the line
+	; Mask to keep just the row
 	AND	$E0
 	; Set the column to 16
 	OR	$10
@@ -151,19 +151,14 @@ checkVerticalLimit:
 	LD	A, H
 	AND	$07
 	CP	$01
-	JR	C, .loopBlank
+	JR	C, .loopCont
 	CP	$07
-	JR	Z, .loopBlank
-	LD	C, LINE
-	JR	.loopCont
+	JR	Z, .loopCont
 
-.loopBlank:
-	LD	C, BLANK
-
-.loopCont:
 	LD	A, (HL)
-	OR	C
+	OR	LINE
 	LD	(HL), A
+.loopCont:
 	CALL	NextScan
 	DJNZ	.loop
 
