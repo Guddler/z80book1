@@ -1,6 +1,21 @@
 	SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
 	device	ZXSPECTRUM48
 
+; TODO: The book optimises the ball speed in chapter 10 to allow 3 bits for the
+; speed and modifies the speed from 1-3 to 2-4. This was still too fast so I have
+; changed it to 3-5 since we can now fit speeds from 1 to 7 into 3 bits.
+;
+; The issue now is that the ball noticably slows down when it passes over the
+; score because we are back to reprinting the score every frame so we back to our
+; original speed before we needed to slow things down.
+;
+; After optimising the print and reprint score routines the slowdown is not worth
+; worrying about, but it is technically still there! A problem for a rainiy day.
+
+; FIXME: I don't think the speeds are correct on paddle collision. In particular
+; 	 the zone 5 collision seems like it's the spped of zone 3 but should be
+;	 the same speed as zone 1
+
 	ORG	$8000
 
 ; start is used by the compiler to create the SNA so has to be first
