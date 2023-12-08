@@ -1,5 +1,9 @@
 	MODULE video
 
+; We need a way to know the border colour because certain routines trash it
+; it is stored at that address
+BORDERCR:	EQU	$5C48
+
 ;------------------------------------------------------------------------------
 ; CheckBottom
 ;
@@ -243,6 +247,7 @@ checkVerticalLimit:
 	; Loop until they're all clear
 	LDIR
 
+	LD	A, $07	; 0 0 000 111
 	; Set attribute memory
 	;
 	; Following the above HL will contain $57FF and we need one more. We
@@ -250,13 +255,16 @@ checkVerticalLimit:
 	; If we just INC HL instead it comes down to 2 bytes and 6 cycles.
 	INC	HL
 	; Set attributes for that byte
-	LD 	(HL), $07	; 0 0 000 111
+	LD 	(HL), A
 	; Set DE to the next address for use by LDIR
 	INC	DE		; As above use INC instead of LD
 	; Set BC to the number of addresses to clear ((24 * 32) - 1 = $2FF)
 	LD	BC, $2FF
 	; Loop until they're all set
 	LDIR
+
+	; Store the border colour
+	LD	(BORDERCR),  A
 
 	RET
 

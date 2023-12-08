@@ -16,6 +16,10 @@
 ; 	 the zone 5 collision seems like it's the spped of zone 3 but should be
 ;	 the same speed as zone 1
 
+; FIXME: Sound effects are kind of sucky. Not that they're crap, but that they
+; cause huge slowdown while they play. Maybe we can do something about this, or
+; maybe it doesn't do it on real hardware? Need to check.
+
 	ORG	$8000
 
 ; start is used by the compiler to create the SNA so has to be first
@@ -28,7 +32,7 @@ codeStart:
 	EI
 
 	; Set the border to red
-	LD	A, $02
+	LD	A, $00
 	OUT	($FE), A
 	; Set an initial ball rotation of 0
 	LD	A, $00
@@ -70,6 +74,9 @@ codeStart:
 	LD	(paddle1pos), HL
 	LD	HL, PADDLE2POS_INI
 	LD	(paddle2pos), HL
+
+	LD	A, SND_BORDER
+	CALL	PlaySound
 
 Loop:
 	CALL	MoveBall
@@ -119,6 +126,8 @@ p2Score:		DB	$00
 	INCLUDE 	"controls.asm"
 	INCLUDE 	"sprite.asm"
 	INCLUDE 	"game.asm"
+	INCLUDE 	"sound.asm"
+
 
 codeLen	= $-codeStart
 

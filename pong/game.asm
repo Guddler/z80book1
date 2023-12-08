@@ -62,6 +62,10 @@ pTime:	DB	$00
 	; If there is no collision, return
 	RET	NZ
 
+	; Sound effect
+	LD	A, SND_PADDLE
+	CALL	PlaySound
+
 	; If we get here, there was a collision
 	;
 	; Get ball properties
@@ -91,6 +95,10 @@ pTime:	DB	$00
 	CALL	CheckCrossY
 	; Again, if no collision, exit
 	RET	NZ
+
+	; Sound effect
+	LD	A, SND_PADDLE
+	CALL	PlaySound
 
 	; As before, we got here so there was a collision
 	;
@@ -417,6 +425,9 @@ pTime:	DB	$00
 
 ; Here we have reached the upper vertical direction so we need to flip the vertical direction
 .upChg:
+	; Beep!
+	LD	A, SND_BORDER
+	CALL	PlaySound
 	; Get current settings
 	LD	A, (ballSetting)
 	; Set bit 7 to indicate we now go down
@@ -442,6 +453,9 @@ pTime:	DB	$00
 	JR	.x
 
 .downChg:
+	; Beep!
+	LD	A, SND_BORDER
+	CALL	PlaySound
 	; Get current settings value
 	LD	A, (ballSetting)
 	; And set vertical direction to down (0) by clearing the bit with AND
@@ -494,6 +508,9 @@ pTime:	DB	$00
 	RET
 
 .rightChg:
+	; Beep!
+	LD	A, SND_SCORE
+	CALL	PlaySound
 	; Load p1 score
 	LD	HL, p1Score
 	; Add one (NB: INC the value at the address pointed to by HL, not HL)
@@ -502,6 +519,9 @@ pTime:	DB	$00
 	CALL	PrintScores
 	CALL	ClearBall
 	CALL	SetBallLeft
+	; Beep!
+	LD	A, SND_BORDER
+	CALL	PlaySound
 
 	; And we're done
 	RET
@@ -541,6 +561,9 @@ pTime:	DB	$00
 	RET
 
 .leftChg:
+	; Beep!
+	LD	A, SND_SCORE
+	CALL	PlaySound
 	; Load p2 score
 	LD	HL, p2Score
 	; Add one (NB: INC the value at the address pointed to by HL, not HL)
@@ -549,6 +572,9 @@ pTime:	DB	$00
 	CALL	PrintScores
 	CALL	ClearBall
 	CALL	SetBallRight
+	; Beep!
+	LD	A, SND_BORDER
+	CALL	PlaySound
 	RET
 
 @MoveBallY:
