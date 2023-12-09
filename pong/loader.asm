@@ -1,45 +1,29 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Busy soft ;; 26.11.2018 ;; Tape generating library ;;
+;; Basic loader from here:
+;; https://github.com/Threetwosevensixseven/sj-tapbas/blob/main/sjasmplus/sjasmplus.asm
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Use:
-;;
-;;   .................
-;;   ...your...code...
-;;   .................
-;;   include "TapLib.asm"
-;;   MakeTape <speccy_model>, <tape_file>, <program_name>, <start_address>, <code_length>, <call_address>
+	include "../common/basiclib.asm"
 
-	MACRO	MakeTape speccy_model, tape_file, prog_name, start_add, code_len, call_add
-	DEVICE	speccy_model
+	ORG $5CCB
 
-CODE	=	#AF
-USR	=	#C0
-LOAD	=	#EF
-CLEAR	=	#FD
-RANDOMIZE =	#F9
+Basic
+	LINE : db clear:NUM codeStart - 1	: LEND
+	LINE : db poke:NUM 23610:db ',':NUM 255 : LEND
+	LINE : db poke:NUM 23624:db ',':NUM 0 	: LEND
+	LINE : db poke:NUM 23693:db ',':NUM 0 	: LEND
+	LINE : db cls				: LEND
+	LINE : db load,'""',screen		: LEND
+	LINE : db poke:NUM 23739:db ',':NUM 111	: LEND
+	LINE : db load,'""',code 	     	: LEND
+	LINE : db pause:NUM 150			: LEND
+	LINE : db rand,usr:NUM codeStart	: LEND
+BasEnd
 
-	org	#5C00
-baszac	db	0,1			;; Line number
-	dw	linlen			;; Line length
-linzac
-	db	CLEAR,'8',#0E,0,0
-	dw	start_add-1
-	db	0,':'
-	db	LOAD,'"'
-codnam	ds	10,32
-	org	codnam
-	db	prog_name
-	org	codnam+10
-	db	'"',CODE,':'
-	db	RANDOMIZE,USR,'8',#0E,0,0
-	dw	call_add
-	db	0,#0D
-linlen	=	$-linzac
-baslen	=	$-baszac
+	ORG	$4000
+	INCBIN "PongScr.bin"
 
-	EMPTYTAP tape_file
-	SAVETAP  tape_file,BASIC,prog_name,baszac,baslen,1
-	SAVETAP  tape_file,CODE,prog_name,start_add,code_len,start_add
-
-	ENDM
+ 	EMPTYTAP "build/pong.tap"
+ 	SAVETAP  "build/pong.tap", BASIC, "loader",	Basic, BasEnd-Basic, 10
+ 	SAVETAP  "build/pong.tap", CODE,  "PongScr",	$4000, $1AFF
+ 	SAVETAP  "build/pong.tap", CODE,  "pong", 	codeStart, codeLen

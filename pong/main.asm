@@ -20,8 +20,7 @@
 ; cause huge slowdown while they play. Maybe we can do something about this, or
 ; maybe it doesn't do it on real hardware? Need to check.
 
-	ORG	$5DAD
-
+	ORG	$5E88
 ; start is used by the compiler to create the SNA so has to be first
 codeStart:
 	; Setup
@@ -136,4 +135,4 @@ codeLen	= $-codeStart
 
 	; Tap file using loader from sjasmplus example lib
 	INCLUDE 	"loader.asm"
-	MakeTape	ZXSPECTRUM48, "build/pong.tap", "PONG", codeStart, codeLen, codeStart
+	;MakeTape	ZXSPECTRUM48, "build/pong.tap", "PONG", codeStart, codeLen, codeStart
