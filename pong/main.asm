@@ -54,6 +54,8 @@ codeStart:
 		CALL	spriteLib.EnableSprites
 		; Draw border
 		CALL	DrawNextBorder
+		; Set CPU speed to 3.5Mhz
+		NEXTREG 7, 0
 	endif
 
 	; Set the border to red
@@ -79,8 +81,7 @@ newGame:
 	; Reset scores from any previous game
 	;
 	; Clear A
-	;XOR	A
-	LD	A, 9
+	XOR	A
 	; Set both scores to 0
 	LD	(p1Score), A
 	LD	(p2Score), A
