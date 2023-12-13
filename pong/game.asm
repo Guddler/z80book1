@@ -516,7 +516,11 @@ pTime:	DB	$00
 	; Add one (NB: INC the value at the address pointed to by HL, not HL)
 	INC	(HL)
 	; And print the new score, clear the ball and set the new direction
-	CALL	PrintScores
+	ifndef ZXNEXT
+		CALL	PrintScores
+	else
+		CALL	PrintScoresNext
+	endif
 	CALL	ClearBall
 	CALL	SetBallLeft
 	; Beep!
@@ -569,7 +573,11 @@ pTime:	DB	$00
 	; Add one (NB: INC the value at the address pointed to by HL, not HL)
 	INC	(HL)
 	; And print the new score
-	CALL	PrintScores
+	ifndef ZXNEXT
+		CALL	PrintScores
+	else
+		CALL	PrintScoresNext
+	endif
 	CALL	ClearBall
 	CALL	SetBallRight
 	; Beep!

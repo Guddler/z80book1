@@ -1,5 +1,14 @@
 	SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
-	device	ZXSPECTRUM48
+
+	;; Comment out to build 48K
+	define ZXNEXT
+
+	ifdef ZXNEXT
+		opt --zxnext
+		device	zxspectrumnext
+	else
+		device	ZXSPECTRUM48
+	endif
 
 ; TODO: The book optimises the ball speed in chapter 10 to allow 3 bits for the
 ; speed and modifies the speed from 1-3 to 2-4. This was still too fast so I have
@@ -30,9 +39,28 @@ codeStart:
 	; slate but it's not a bad idea for TAP too...
 	EI
 
+	ifdef	ZXNEXT
+		; Load pallette
+		LD	HL, palette
+		LD	B, palette_count
+		LD	C, PALETTE_1ST_SPRITE	;00100000
+		CALL	spriteLib.LoadPalette
+		; Setup sprites
+		LD	HL, spriteStart
+		LD	BC, 16 * 16 * sprite_count
+		LD	A, 0
+		CALL	spriteLib.LoadSpritesDMA
+		; Enablesprites
+		CALL	spriteLib.EnableSprites
+		; Draw border
+		CALL	DrawNextBorder
+	endif
+
 	; Set the border to red
 	LD	A, $00
 	OUT	($FE), A
+
+newGame:
 	; Set an initial ball rotation of 0
 	LD	A, $00
 	LD	(ballRotation), A
@@ -40,20 +68,28 @@ codeStart:
 	CALL	Cls
 	CALL	PrintLine
 	CALL	PrintBorder
-	CALL	PrintScores
+	ifndef ZXNEXT
+		CALL	PrintScores
+	else
+		CALL	PrintScoresNext
+	endif
 
 	; Before main loop, wait for the someone to press 5 to start
 	CALL	WaitStart
 	; Reset scores from any previous game
 	;
 	; Clear A
-	XOR	A
+	;XOR	A
+	LD	A, 9
 	; Set both scores to 0
 	LD	(p1Score), A
 	LD	(p2Score), A
-	; Print new score
-	CALL	PrintScores
-
+	ifndef ZXNEXT
+		; Print new score
+		CALL	PrintScores
+	else
+		CALL	PrintScoresNext
+	endif
 	; Reset ball speed
 	;
 	; Load current ball setting
@@ -90,7 +126,9 @@ Loop:
 	; Print ball and loop
 	CALL 	PrintBall
 	CALL	ReprintLine
-	CALL	ReprintScores
+	ifndef ZXNEXT
+		CALL	ReprintScores
+	endif
 
 	; Draw paddles
 	LD 	HL, (paddle1pos)
@@ -104,11 +142,11 @@ Loop:
 	; Check for a win
 	LD	A, (p1Score)
 	CP	$0F
-	JP	Z, codeStart
+	JP	Z, newGame
 
 	LD	A, (p2Score)
 	CP 	$0f
-	JP	Z, codeStart
+	JP	Z, newGame
 
 	JP	Loop
 
@@ -126,13 +164,21 @@ p2Score:		DB	$00
 	INCLUDE 	"sprite.asm"
 	INCLUDE 	"game.asm"
 	INCLUDE 	"sound.asm"
-
+	ifdef ZXNEXT
+		INCLUDE		"../common/spritelib.asm"
+	endif
 
 codeLen	= $-codeStart
 
-	; Snapshot for ZSim
-	SAVESNA 	"build/pong.sna", codeStart
-
-	; Tap file using loader from sjasmplus example lib
-	INCLUDE 	"loader.asm"
-	;MakeTape	ZXSPECTRUM48, "build/pong.tap", "PONG", codeStart, codeLen, codeStart
+	ifdef ZXNEXT
+		SAVENEX OPEN "build/pong.nex", codeStart
+		SAVENEX CORE 2,0,0
+		SAVENEX CFG 0
+		SAVENEX AUTO
+		SAVENEX CLOSE
+	else
+		; Snapshot for ZSim
+		SAVESNA 	"build/pong.sna", codeStart
+		; Tap file using loader from sjasmplus example lib
+		INCLUDE 	"loader.asm"
+	endif

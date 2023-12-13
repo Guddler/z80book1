@@ -482,7 +482,82 @@ checkVerticalLimit:
 	RET
 
 ;------------------------------------------------------------------------------
-; PrintScore:
+; PrintScoresNext:
+; Prints the player scores in the top border using ZXNext specific sprites
+; This way we don't need to worry about reprinting the scores when the ball
+; passes over them and should gain performance.
+;
+; Sprites 0 & 1: P1 Score. Sprites 2 & 3: P2 Score
+;
+; Input:
+; Output:
+; Everything changed on exit
+;------------------------------------------------------------------------------
+@PrintScoresNext
+	OR	A
+	LD	A, (p1Score)
+	DAA
+.digit1:
+	AND	$F0
+	.4	SRL	A
+	LD	H, 126	; X
+	LD	L, 2	; Y
+	LD	D, 0
+	JR	Z, .hideDigit1
+	OR	A, SPRITE_VISIBLE
+.hideDigit1:
+	LD	E, A
+	LD	A, 0
+	CALL	spriteLib.DrawSprite
+
+.digit2:
+	OR	A
+	LD	A, (p1Score)
+	DAA
+	AND	$0F
+
+	LD	H, 134	; X
+	LD	L, 2	; Y
+	LD	D, 0
+	OR	A, SPRITE_VISIBLE
+	LD	E, A
+	LD	A, 1
+	CALL	spriteLib.DrawSprite
+; P2 Score
+	OR	A
+	LD	A, (p2Score)
+	DAA
+.digit3:
+	AND	$F0
+	.4	SRL	A
+	LD	H, 160	; X
+	LD	L, 2	; Y
+	LD	D, 0
+	JR	Z, .hideDigit3
+	OR	A, SPRITE_VISIBLE
+.hideDigit3:
+	LD	E, A
+	LD	A, 2
+	CALL	spriteLib.DrawSprite
+
+.digit4:
+	OR	A
+	LD	A, (p2Score)
+	DAA
+	AND	$0F
+
+	LD	H, 168	; X
+	LD	L, 2	; Y
+	LD	D, 0
+	OR	A, SPRITE_VISIBLE
+	LD	E, A
+	LD	A, 3
+	CALL	spriteLib.DrawSprite
+
+	RET
+
+;------------------------------------------------------------------------------
+; PrintScores:
 ; Prints the player scores
 ;
 ; Input:
@@ -653,5 +728,140 @@ p2print:
 	CP	POINTS_X2_L
 	RET	C
 	JR	p2print
+
+	ifdef ZXNEXT
+;------------------------------------------------------------------------------
+; DrawNextBorder:
+; For the ZXNext version of the game we draw a border around the
+;
+; Input:
+; Output:
+; AF, BC, DE and HL changed on exit
+;------------------------------------------------------------------------------
+;
+; This is mostly just a bunch of sprite draw calls and their setups. The border
+; does loop though and that code is probably really inneficient
+;
+pos		DB	0
+@DrawNextBorder:
+	; Top Left
+	LD	H, 16	; X
+	LD	L, 16	; Y
+	LD	D, 0
+	LD	E, SPRITE_VISIBLE | PATTERN_CORNER
+	LD	A, 10
+	CALL	spriteLib.DrawSprite
+	; Top Right
+	LD	H, 32	; X
+	LD	L, 16	; Y
+	LD	D, SPRITE_MIRROR_X | SPRITE_HIGH_X
+	LD	E, SPRITE_VISIBLE | PATTERN_CORNER
+	LD	A, 11
+	CALL	spriteLib.DrawSprite
+	; Bottom Left
+	LD	H, 16	; X
+	LD	L, 224	; Y
+	LD	D, SPRITE_MIRROR_Y
+	LD	E, SPRITE_VISIBLE | PATTERN_CORNER
+	LD	A, 12
+	CALL	spriteLib.DrawSprite
+	; Bottom Right
+	LD	H, 32	; X
+	LD	L, 224	; Y
+	LD	D, SPRITE_MIRROR_X | SPRITE_MIRROR_Y | SPRITE_HIGH_X
+	LD	E, SPRITE_VISIBLE | PATTERN_CORNER
+	LD	A, 13
+	CALL	spriteLib.DrawSprite
+
+	LD	B, 12
+	LD	A, 32
+	LD	(pos), A
+
+	; Left Border
+.loopL:
+	LD	H, 16		; X
+	LD	A, (pos)
+	LD	L, A		; Y
+	LD	D, SPRITE_MIRROR_X | SPRITE_ROTATE
+	LD	E, SPRITE_VISIBLE | PATTERN_BORDER
+	LD	A, B
+	ADD	13
+	CALL	spriteLib.DrawSprite
+	LD	A, (pos)
+	ADD	16
+	LD	(pos), A
+	DJNZ	.loopL
+
+	LD	A, 32
+	LD	(pos), A
+	LD	B, 12
+	; Right Border
+.loopR:
+	LD	H, 32		; X
+	LD	A, (pos)
+	LD	L, A		; Y
+	LD	D, SPRITE_ROTATE | SPRITE_HIGH_X
+	LD	E, SPRITE_VISIBLE | PATTERN_BORDER
+	LD	A, B
+	ADD	25
+	CALL	spriteLib.DrawSprite
+	LD	A, (pos)
+	ADD	16
+	LD	(pos), A
+	DJNZ	.loopR
+
+	LD	A, 16	; In this case, X
+	LD	(pos), A
+	LD	B, 16	; Num sprites
+	; Top Border
+.loopT:
+	LD	A, (pos)
+	LD	H, A		; X
+	LD	L, 16		; Y
+	LD	D, 0
+
+	LD	A, B
+	SUB	15
+	JR	C, .nohbit1
+
+	LD	D, SPRITE_HIGH_X
+.nohbit1:
+	LD	E, SPRITE_VISIBLE | PATTERN_BORDER
+	LD	A, B
+	ADD	37
+	CALL	spriteLib.DrawSprite
+	LD	A, (pos)
+	SUB	16
+	LD	(pos), A
+	DJNZ	.loopT
+
+	LD	A, 16	; In this case, X
+	LD	(pos), A
+	LD	B, 16	; Num sprites
+	; Bottom border
+.loopB:
+	LD	A, (pos)
+	LD	H, A		; X
+	LD	L, 224		; Y
+	LD	D, SPRITE_MIRROR_Y
+
+	LD	A, B
+	SUB	15
+	JR	C, .nohbit2
+
+	LD	D, SPRITE_MIRROR_Y | SPRITE_HIGH_X
+.nohbit2:
+	LD	E, SPRITE_VISIBLE | PATTERN_BORDER
+	LD	A, B
+	ADD	53
+	CALL	spriteLib.DrawSprite
+	LD	A, (pos)
+	SUB	16
+	LD	(pos), A
+	DJNZ	.loopB
+
+	RET
+
+	endif
 
 	ENDMODULE

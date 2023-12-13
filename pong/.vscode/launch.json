@@ -7,7 +7,7 @@
 		{
 			"type": "dezog",
 			"request": "launch",
-			"name": "ZEsarUX",
+			"name": "ZEsarUX - 48K",
 			"remoteType": "zrcp",
 			"zrcp": {
 				"hostname": "localhost",
@@ -28,6 +28,32 @@
 			"startAutomatically": true,
 			"rootFolder": "${workspaceFolder}",
 			"load": "${workspaceFolder}/build/pong.tap",
+			"preLaunchTask": "Build (sjasmplus)"
+		},
+		{
+			"type": "dezog",
+			"request": "launch",
+			"name": "ZEsarUX (ZXNext)",
+			"remoteType": "zrcp",
+			"zrcp": {
+				"hostname": "localhost",
+				"port": 10000,
+				"skipInterrupt": true
+			},
+			"sjasmplus": [
+				{
+					"path": "${workspaceFolder}/build/pong.sld"
+				}
+			],
+			"commandsAfterLaunch": [],
+			"history": {
+				"reverseDebugInstructionCount": 1000000,
+				"spotCount": 10,
+				"codeCoverageEnabled": true
+			},
+			"startAutomatically": true,
+			"rootFolder": "${workspaceFolder}",
+			"load": "${workspaceFolder}/build/pong.nex",
 			"preLaunchTask": "Build (sjasmplus)"
 		},
 		{

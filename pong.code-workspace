@@ -3,6 +3,9 @@
 		{
 			"path": "pong"
 		},
+		{
+			"path": "common"
+		}
 	],
 	"settings": {
 		"editor.tabSize": 4,
