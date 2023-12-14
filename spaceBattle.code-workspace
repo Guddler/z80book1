@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "SpaceBattle"
+		},
+		{
+			"path": "common"
+		}
+	],
+	"settings": {
+		"editor.tabSize": 8,
+		"files.associations": {
+			// "*.{z80,asm,inc}": "z80-macroasm"
+		},
+	}
+}

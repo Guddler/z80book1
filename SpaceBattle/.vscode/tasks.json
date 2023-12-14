@@ -1,0 +1,68 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Zesarux (48K)",
+			"type": "shell",
+			"command": "$HOME/Dev/Spectrum/bin/ZEsarUX.app/Contents/MacOS/zesarux",
+			"args": [
+				"--configfile",
+				"$HOME/.zesaruxrc.48k"
+			],
+			"presentation": {
+				"echo": false,
+				"reveal": "never",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Zesarux (Next)",
+			"type": "shell",
+			"command": "$HOME/Dev/Spectrum/bin/ZEsarUX.app/Contents/MacOS/zesarux",
+			"args": [
+				"--configfile",
+				"$HOME/.zesaruxrc.nex"
+			],
+			"presentation": {
+				"echo": false,
+				"reveal": "never",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Build (sjasmplus)",
+			"type": "shell",
+			"command": "$HOME/Dev/Spectrum/bin/sjasmplus",
+			"args": [
+				"--fullpath",
+				"--syntax=f",
+				"--sld=${workspaceFolder}/build/sbattle.sld",
+				"${workspaceFolder}/main.asm"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": true,
+				"revealProblems": "onProblem"
+			},
+			"problemMatcher": "$problem-matcher-sjasmplus"
+		}
+	]
+}

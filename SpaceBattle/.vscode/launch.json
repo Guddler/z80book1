@@ -1,0 +1,95 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "dezog",
+			"request": "launch",
+			"name": "ZEsarUX - 48K",
+			"remoteType": "zrcp",
+			"zrcp": {
+				"hostname": "localhost",
+				"port": 10000,
+				"skipInterrupt": true
+			},
+			"sjasmplus": [
+				{
+					"path": "${workspaceFolder}/build/sbattle.sld"
+				}
+			],
+			"commandsAfterLaunch": [],
+			"history": {
+				"reverseDebugInstructionCount": 1000000,
+				"spotCount": 10,
+				"codeCoverageEnabled": true
+			},
+			"startAutomatically": true,
+			"rootFolder": "${workspaceFolder}",
+			"load": "${workspaceFolder}/build/sbattle.sna",
+			"preLaunchTask": "Build (sjasmplus)"
+		},
+		{
+			"type": "dezog",
+			"request": "launch",
+			"name": "ZEsarUX (ZXNext)",
+			"remoteType": "zrcp",
+			"zrcp": {
+				"hostname": "localhost",
+				"port": 10000,
+				"skipInterrupt": true
+			},
+			"sjasmplus": [
+				{
+					"path": "${workspaceFolder}/build/sbattle.sld"
+				}
+			],
+			"commandsAfterLaunch": [],
+			"history": {
+				"reverseDebugInstructionCount": 1000000,
+				"spotCount": 10,
+				"codeCoverageEnabled": true
+			},
+			"startAutomatically": true,
+			"rootFolder": "${workspaceFolder}",
+			"load": "${workspaceFolder}/build/sbattle.nex",
+			"preLaunchTask": "Build (sjasmplus)"
+		},
+		{
+			"type": "dezog",
+			"request": "launch",
+			"name": "Simulator - ZX48K Spectrum",
+			"remoteType": "zsim",
+			"zsim": {
+				"visualMemory": true,
+				"memoryModel": "ZX48K",
+				"ulaScreen": true,
+				"zxBorderWidth": 25,
+				"vsyncInterrupt": true,
+				"zxKeyboard": true,
+				"zxInterface2Joy": false,
+				"kempstonJoy": false,
+				"zxBeeper": false,
+				// "cpuFrequency": 3500000.0,
+				"updateFrequency": 100
+			},
+			"sjasmplus": [
+				{
+					"path": "${workspaceFolder}/build/sbattle.sld"
+				}
+			],
+			"commandsAfterLaunch": [],
+			"history": {
+				"reverseDebugInstructionCount": 1000000,
+				"spotCount": 10,
+				"codeCoverageEnabled": true
+			},
+			"startAutomatically": true,
+			"rootFolder": "${workspaceFolder}",
+			"load": "${workspaceFolder}/build/sbattle.sna",
+			// "topOfStack": "Add your top of stack / label name"
+		},
+
+	]
+}
